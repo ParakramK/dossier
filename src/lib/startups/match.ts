@@ -38,7 +38,7 @@ const list = (items: string[]) => (items.length <= 1 ? (items[0] ?? "") : `${ite
 
 /** Where a startup says it hires: its location, and the title or the post's first line. */
 export const whereText = (startup: Pick<FoundStartup, "source" | "location" | "summary" | "details">) =>
-  [startup.location, startup.source === "YC" ? startup.summary : headerParts(startup.details).join(" | ")].join(" | ");
+  [startup.location, startup.source === "YC" || startup.source === "WAAS" ? startup.summary : headerParts(startup.details).join(" | ")].join(" | ");
 
 export type StartupFit = { score: number; reasons: string[] };
 
@@ -100,6 +100,11 @@ export function matchStartup(
   if (startup.stage.startsWith("YC ")) {
     score += 5;
     reasons.push(`A ${startup.stage} startup`);
+  } else if (/\b(early[- ]stage|seed|pre[- ]seed|series a)\b/i.test(startup.stage)) {
+    // Wellfound names the stage without a round; seed and Series A are the
+    // ones where a warm introduction matters most.
+    score += 5;
+    reasons.push("An early-stage startup");
   }
   if (startup.emails.some((email) => email.label === "Hiring" || email.label === "Founders")) {
     score += 5;

@@ -10,8 +10,11 @@ import { adzuna } from "./adzuna";
 import { arbeitsagentur } from "./arbeitsagentur";
 import { freehire } from "./freehire";
 import { jsearch } from "./jsearch";
+import { merojob } from "./merojob";
+import { remotive } from "./remotive";
 import { postingKey, type FoundPosting, type JobSource, type SearchPage, type SearchQuery } from "./search";
 import { sourceCovers } from "./sources";
+import { yc } from "./yc";
 
 // Searching the chosen job source from the server (E14-1). Results are
 // cached for half an hour; failures come back as JobSearchError with a
@@ -26,6 +29,9 @@ const ADAPTERS: { [S in JobSource]: JobSourceAdapter<S> } = {
   ADZUNA: adzuna,
   ARBEITSAGENTUR: arbeitsagentur,
   FREEHIRE: freehire,
+  MEROJOB: merojob,
+  YC: yc,
+  REMOTIVE: remotive,
 };
 
 const adapterFor = <S extends JobSource>(source: S) => ADAPTERS[source] as JobSourceAdapter<S>;

@@ -226,3 +226,176 @@ export const freehireLastPage = {
   ],
   meta: { total: 21, limit: 20, offset: 20 },
 };
+
+/** merojob's browse API: each result carries its own description and specification. */
+export const merojobPage = {
+  count: 45,
+  next: "https://api.merojob.com/api/v1/jobs/?limit=20&offset=20",
+  previous: null,
+  results: [
+    {
+      id: 204743,
+      title: "Full-Stack Developer",
+      slug: "full-stack-developer-245",
+      absolute_url: "/full-stack-developer-245/",
+      client: { id: 2178, client_name: "Himalayan Software", verified: true },
+      description: "<p>We are hiring a <strong>Full-Stack Developer</strong> for our Kathmandu office.</p><ul><li>React and Node</li></ul>",
+      specification: "<ul><li>Bachelor's in Computer Science</li><li>2+ years of experience</li></ul>",
+      job_summary: "Build web applications with React and Node.",
+      hide_org_name: false,
+      hide_salary: false,
+      posted_at: "2026-11-16T04:26:29.127639Z",
+      offered_salary: { id: 1420, currency: "NRs", minimum: 90000, maximum: 120000, unit: "Monthly" },
+      job_locations: [{ id: 1, name: null, address: "Jawalakhel, Lalitpur", district: null, country: null }],
+    },
+    {
+      id: 204744,
+      title: "Remote Backend Developer",
+      slug: "remote-backend-developer-246",
+      absolute_url: "/remote-backend-developer-246/",
+      client: { id: 2179, client_name: "Hidden Employer" },
+      description: "<p>A fully remote backend role.</p>",
+      specification: null,
+      hide_org_name: true,
+      hide_salary: true,
+      posted_at: "2026-11-15T08:00:00Z",
+      offered_salary: { currency: "NRs", minimum: 80000, maximum: null, unit: "Monthly" },
+      job_locations: [{ address: "Kathmandu", district: null, country: null }],
+    },
+    // Repeated id: kept once.
+    { id: 204743, title: "Duplicate", client: { client_name: "Himalayan Software" } },
+    // Without an id: skipped.
+    { title: "No id" },
+  ],
+};
+
+/** merojob's last page: fewer than a full page of results. */
+export const merojobLastPage = { count: 45, next: null, previous: null, results: [] };
+
+/** Hacker News' search by date, with YC companies' job stories. */
+export const ycPage = {
+  hits: [
+    {
+      objectID: "50452404",
+      title: "Tinfoil (YC P25) is hiring an applied AI security engineer in San Francisco",
+      url: null,
+      story_text: null,
+      created_at: "2026-11-11T12:00:35Z",
+      created_at_i: 1762862435,
+    },
+    {
+      objectID: "50391342",
+      title: "Mbodi AI (YC P25) Is Hiring Research and Robotic Engineers",
+      url: "https://www.ycombinator.com/companies/mbodi-ai/jobs",
+      story_text: null,
+      created_at: "2026-11-06T12:00:42Z",
+      created_at_i: 1762430442,
+    },
+    {
+      objectID: "50381512",
+      title: "Sava Trust (YC F25) Is Hiring a Founding Engineer in NYC",
+      url: "",
+      story_text: "<p>Build the future of escrow.</p>",
+      created_at: "2026-11-05T17:01:23Z",
+      created_at_i: 1762358483,
+    },
+    {
+      objectID: "50399999",
+      title: "Nimbus (YC W24) Is Hiring a Remote Platform Engineer",
+      url: "https://nimbus.example/jobs/1",
+      story_text: null,
+      created_at: "2026-11-04T09:00:00Z",
+      created_at_i: 1762246800,
+    },
+    // Without a title: skipped.
+    { objectID: "1", url: "https://example.com/jobs" },
+  ],
+  nbHits: 30,
+  nbPages: 2,
+  page: 0,
+  hitsPerPage: 20,
+};
+
+/** Hacker News' last page. */
+export const ycLastPage = {
+  hits: [
+    {
+      objectID: "50339827",
+      title: "Bitmovin (YC S15) Is Hiring Technical Graduates in Denver",
+      url: "https://bitmovin.com/careers/8660599002/",
+      created_at: "2026-11-02T17:00:41Z",
+      created_at_i: 1762093241,
+    },
+  ],
+  nbHits: 21,
+  nbPages: 1,
+  page: 1,
+  hitsPerPage: 20,
+};
+
+/** Remotive's search proxy: its own hits, with the location filters its search uses. */
+const remotiveEngineer = {
+  id: "6648271",
+  title: "<em>Python</em> Typescript Engineer",
+  skills: ["python", "typescript"],
+  company_name: "Turing Enterprise Inc.",
+  locations: ["Worldwide"],
+  url: "https://jobs.workable.com/view/abc/remote-python-typescript-engineer",
+  salary: "unspecified",
+  category: "Software Development",
+  seniority: "mid-level",
+  job_type: "contract",
+  discovered_on: "2026-11-18 22:31:20",
+  remotive_com_url: "https://remotive.com/remote/jobs/software-development/python-typescript-engineer-6648271",
+};
+
+const remotiveDesigner = {
+  id: "6648272",
+  title: "Senior Product Designer",
+  company_name: "Harbourlight",
+  locations: ["Berlin", "Germany"],
+  url: "https://harbourlight.example/jobs/1",
+  salary: "€75,000–90,000",
+  category: "Design",
+  job_type: "full-time",
+  discovered_on: "2026-11-17 09:00:00",
+  remotive_com_url: "https://remotive.com/remote/jobs/design/senior-product-designer-6648272",
+};
+
+const remotiveOld = {
+  id: "6648273",
+  title: "Platform Engineer",
+  company_name: "Ledgerly",
+  locations: ["Germany"],
+  url: "https://ledgerly.example/jobs/2",
+  salary: "€70,000",
+  category: "Engineering",
+  job_type: "full-time",
+  discovered_on: "2026-01-05 08:00:00",
+  remotive_com_url: "https://remotive.com/remote/jobs/engineering/platform-engineer-6648273",
+};
+
+/** Remotive's first page. */
+export const remotivePage = {
+  jsonrpc: "2.0",
+  id: null,
+  result: {
+    results: [
+      {
+        // As its search highlights the words it matched.
+        hits: [remotiveEngineer, remotiveDesigner, remotiveOld, remotiveEngineer, { id: "no-title", remotive_com_url: "https://remotive.com/x" }],
+        nbHits: 5,
+        page: 0,
+        nbPages: 2,
+        hitsPerPage: 20,
+      },
+    ],
+  },
+};
+
+/** Remotive's last page. */
+export const remotiveLastPage = {
+  jsonrpc: "2.0",
+  id: null,
+  result: { results: [{ hits: [], nbHits: 21, page: 1, nbPages: 1, hitsPerPage: 20 }] },
+};

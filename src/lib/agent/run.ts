@@ -63,7 +63,7 @@ async function setupProblemFor(searches: readonly SavedAgentSearch[], config: Jo
   if (scoring) return scoring;
   if (!config.source) return "Choose a job source in Settings → Job search first.";
   // It searches on its own, which the BA's terms forbid most clearly (#223).
-  if (config.source === "ARBEITSAGENTUR") return "The job agent doesn't search the Bundesagentur für Arbeit. Choose JSearch, Adzuna or FreeHire in Settings → Job search for it.";
+  if (config.source === "ARBEITSAGENTUR") return "The job agent doesn't search the Bundesagentur für Arbeit. Choose another source in Settings → Job search for it.";
   try {
     credentialsFor(config, config.source);
   } catch (error) {
@@ -131,7 +131,7 @@ async function scan(manual: boolean, context: JobContext, now: Date, requestNow:
   const searches = allSearches.filter((search) => search.enabled);
   const source = config.source;
   // Keep this explicit server-side guard before admission as well as setup.
-  if (!source || source === "ARBEITSAGENTUR") return stopped("Choose JSearch, Adzuna or FreeHire in Settings → Job search for the job agent.");
+  if (!source || source === "ARBEITSAGENTUR") return stopped("Choose another source in Settings → Job search for the job agent.");
   const credentials = credentialsFor(config, source);
   const run = await reserveRun(now, manual, searches.length, await lastKnownTimeZone());
   if (typeof run === "string") return stopped(run);

@@ -36,7 +36,7 @@ beforeEach(() => {
 });
 
 describe("JobSearchSection", () => {
-  it("offers the four sources and Off, as a radio group, Off by default", () => {
+  it("offers every source and Off, as a radio group, Off by default", () => {
     render(<JobSearchSection initial={off} />);
     expect(screen.getByRole("heading", { name: "Job search" })).toBeInTheDocument();
     expect(screen.getAllByRole("radio").map((radio) => radio.getAttribute("aria-label"))).toEqual([
@@ -44,6 +44,9 @@ describe("JobSearchSection", () => {
       "Adzuna",
       "FreeHire",
       "Bundesagentur für Arbeit",
+      "merojob",
+      "Y Combinator",
+      "Remotive",
       "Off",
     ]);
     expect(screen.getByRole("radio", { name: "Off" })).toBeChecked();
@@ -128,7 +131,15 @@ describe("JobSearchSection", () => {
 
   it("leaves the Arbeitsagentur out when the server doesn't offer it", () => {
     render(<JobSearchSection initial={withSource({ arbeitsagentur: { offered: false, acceptedAt: null } })} />);
-    expect(screen.getAllByRole("radio").map((radio) => radio.getAttribute("aria-label"))).toEqual(["JSearch", "Adzuna", "FreeHire", "Off"]);
+    expect(screen.getAllByRole("radio").map((radio) => radio.getAttribute("aria-label"))).toEqual([
+      "JSearch",
+      "Adzuna",
+      "FreeHire",
+      "merojob",
+      "Y Combinator",
+      "Remotive",
+      "Off",
+    ]);
   });
 
   it("says which FreeHire it searches, with no key to ask for", () => {
@@ -139,6 +150,23 @@ describe("JobSearchSection", () => {
     unmount();
     render(<JobSearchSection initial={withSource({ source: "FREEHIRE", freehire: { host: "jobs.example" } })} />);
     expect(screen.getByText("No key needed. Dossier searches your own FreeHire at jobs.example.")).toBeInTheDocument();
+  });
+
+  it("needs no key for merojob, Y Combinator or Remotive either", () => {
+    const { unmount } = render(<JobSearchSection initial={withSource({ source: "MEROJOB" })} />);
+    expect(screen.getByText(/Dossier searches merojob's public job API/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/key/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Test connection" })).toBeInTheDocument();
+    unmount();
+    const yc = render(<JobSearchSection initial={withSource({ source: "YC" })} />);
+    expect(screen.getByText(/Dossier searches YC startups' job posts on Hacker News/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/key/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Test connection" })).toBeInTheDocument();
+    yc.unmount();
+    render(<JobSearchSection initial={withSource({ source: "REMOTIVE" })} />);
+    expect(screen.getByText(/Dossier searches Remotive's remote job board/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/key/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Test connection" })).toBeInTheDocument();
   });
 
   it("shows keys from the environment and keys that can't be read", () => {

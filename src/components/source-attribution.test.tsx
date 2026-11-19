@@ -23,6 +23,11 @@ describe("attributionHref", () => {
     expect(attributionHref("ARBEITSAGENTUR", "https://www.arbeitsagentur.de/jobsuche/jobdetail/1")).toBeNull();
     expect(attributionHref("FREEHIRE", "https://boards.greenhouse.io/acme/jobs/1")).toBeNull();
   });
+
+  it("links Remotive's label back to Remotive", () => {
+    expect(attributionHref("REMOTIVE", "https://remotive.com/remote/jobs/design/senior-product-designer-1")).toBe("https://remotive.com");
+    expect(attributionHref("REMOTIVE", "https://example.com/jobs/1")).toBe("https://remotive.com");
+  });
 });
 
 describe("SourceAttribution", () => {

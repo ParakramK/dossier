@@ -216,11 +216,11 @@ describe("importExport (E10-6)", () => {
     const application = await prisma().application.create({ data: { title: "Android · Acme" } });
     const emails = [{ email: "jobs@acme.example", label: "Hiring", from: "https://acme.example/careers", onRequest: false, foundAt: "2026-10-01T00:00:00.000Z" }];
     await prisma().startup.create({
-      data: { source: "HN", externalId: "1", company: "Acme", roles: ["Engineer"], emails, links: [], reasons: ["In Berlin"], status: "SAVED", notes: "Ask about Compose", applicationId: application.id },
+      data: { source: "HN", externalId: "1", company: "Acme", roles: ["Engineer"], emails, links: [], reasons: ["In Berlin"], status: "SAVED", notes: "Ask about Compose", outreach: "Four sentences to the founder.", outreachAt: new Date("2026-10-02T00:00:00.000Z"), applicationId: application.id },
     });
     await prisma().startup.create({ data: { source: "YC", externalId: "2", company: "Gone", roles: [], emails: [], links: [], reasons: [], status: "DISMISSED" } });
     await prisma().startupBlock.create({ data: { hash: "b".repeat(64) } });
-    const select = { externalId: true, status: true, notes: true, emails: true, roles: true, applicationId: true } as const;
+    const select = { externalId: true, status: true, notes: true, outreach: true, outreachAt: true, emails: true, roles: true, applicationId: true } as const;
     const before = await prisma().startup.findMany({ orderBy: { externalId: "asc" }, select });
     const file = await asFile();
     expect(file.startups).toHaveLength(2);
@@ -242,6 +242,26 @@ describe("importExport (E10-6)", () => {
     if (!parsed.ok) return;
     await importExport(prisma(), parsed.data);
     expect(await prisma().startup.count()).toBe(0);
+  });
+
+  it("restores the fellowships watchlist with its notes, and reads files from before it as having none", async () => {
+    await prisma().opportunityWatch.create({ data: { catalogId: "mats", status: "PREPARING", notes: "Ask about the visa route." } });
+    const file = await asFile();
+    expect(file.opportunityWatch).toMatchObject([{ catalogId: "mats", status: "PREPARING", notes: "Ask about the visa route." }]);
+
+    await prisma().opportunityWatch.deleteMany();
+    await importExport(prisma(), file);
+    expect(await prisma().opportunityWatch.findMany({ select: { catalogId: true, status: true, notes: true } })).toEqual([
+      { catalogId: "mats", status: "PREPARING", notes: "Ask about the visa route." },
+    ]);
+
+    const older = JSON.parse(JSON.stringify(file));
+    delete older.opportunityWatch;
+    const parsed = parseExport(JSON.stringify(older));
+    expect(parsed).toMatchObject({ ok: true, data: { opportunityWatch: [] } });
+    if (!parsed.ok) return;
+    await importExport(prisma(), parsed.data);
+    expect(await prisma().opportunityWatch.count()).toBe(0);
   });
 
   it("reads files from before projects as having none (PRO-13)", async () => {

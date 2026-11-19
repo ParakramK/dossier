@@ -4,15 +4,20 @@ import { adzuna } from "./adzuna";
 import { arbeitsagentur } from "./arbeitsagentur";
 import { requestContext } from "./config";
 import { freehire } from "./freehire";
+import { merojob } from "./merojob";
+import { remotive } from "./remotive";
 import { EMPTY_QUERY } from "./search";
+import { yc } from "./yc";
 
-// Checks against the real Adzuna, Arbeitsagentur and FreeHire services,
-// skipped unless asked for. The Arbeitsagentur and FreeHire need no key;
+// Checks against the real Adzuna, Arbeitsagentur, FreeHire, merojob,
+// Y Combinator and Remotive services, skipped unless asked for. The
+// Arbeitsagentur, FreeHire, merojob, Y Combinator and Remotive need no key;
 // Adzuna spends two calls from the day's allowance:
 //
 //   JOBS_LIVE=arbeitsagentur docker/bin/yarn vitest run src/lib/job-search/sources.live.test.ts
 //   JOBS_LIVE=adzuna ADZUNA_TEST_APP_ID=… ADZUNA_TEST_KEY=… docker/bin/yarn vitest run src/lib/job-search/sources.live.test.ts
 //   JOBS_LIVE=freehire docker/bin/yarn vitest run src/lib/job-search/sources.live.test.ts
+//   JOBS_LIVE=merojob,yc,remotive docker/bin/yarn vitest run src/lib/job-search/sources.live.test.ts
 //
 // FreeHire's is freehire.me, or the self-hosted one DOSSIER_FREEHIRE_URL
 // names, on the command line or in `.env`.
@@ -67,5 +72,54 @@ describe.runIf(live.has("freehire"))("FreeHire (live)", { timeout: 30_000 }, () 
     expect(postings.length).toBeGreaterThan(0);
     const weekAgo = Date.now() - 8 * 86_400_000;
     expect(postings.every((posting) => posting.postedAt !== null && Date.parse(posting.postedAt) > weekAgo)).toBe(true);
+  });
+});
+
+describe.runIf(live.has("merojob"))("merojob (live)", { timeout: 30_000 }, () => {
+  it("finds postings across Nepal, with their text and a link, and a second page", async () => {
+    const page = await merojob.search({ ...EMPTY_QUERY, place: "Kathmandu", country: "np" }, {}, null);
+    expect(page.postings.length).toBeGreaterThan(0);
+    for (const posting of page.postings) {
+      expect(posting.title).not.toBe("");
+      expect(posting.url).toMatch(/^https:\/\/merojob\.com\//);
+      expect(posting.postedAt).not.toBeNull();
+    }
+    expect(page.postings.every((posting) => posting.complete)).toBe(true);
+    expect(page.next).not.toBeNull();
+    expect((await merojob.search({ ...EMPTY_QUERY, place: "Kathmandu", country: "np" }, {}, page.next)).postings.length).toBeGreaterThan(0);
+  });
+});
+
+describe.runIf(live.has("yc"))("Y Combinator (live)", { timeout: 30_000 }, () => {
+  it("finds recent job posts on Hacker News, with a link, and a second page", async () => {
+    const page = await yc.search({ ...EMPTY_QUERY, country: "us" }, {}, null);
+    expect(page.postings.length).toBeGreaterThan(0);
+    for (const posting of page.postings) {
+      expect(posting.title).not.toBe("");
+      expect(posting.company).not.toBe("");
+      expect(posting.url).toMatch(/^https:\/\//);
+      expect(posting.postedAt).not.toBeNull();
+    }
+    expect(page.next).not.toBeNull();
+    expect((await yc.search({ ...EMPTY_QUERY, country: "us" }, {}, page.next)).postings.length).toBeGreaterThan(0);
+  });
+});
+
+describe.runIf(live.has("remotive"))("Remotive (live)", { timeout: 30_000 }, () => {
+  it("finds remote postings open in a country, with a link and a second page", async () => {
+    const page = await remotive.search({ ...EMPTY_QUERY, keywords: "engineer", country: "de" }, {}, null);
+    expect(page.postings.length).toBeGreaterThan(0);
+    for (const posting of page.postings) {
+      expect(posting.title).not.toBe("");
+      expect(posting.url).toMatch(/^https:\/\/remotive\.com\//);
+      expect(posting.remote).toBe(true);
+    }
+    expect(page.next).not.toBeNull();
+    expect((await remotive.search({ ...EMPTY_QUERY, keywords: "engineer", country: "de" }, {}, page.next)).postings.length).toBeGreaterThan(0);
+  });
+
+  it("reads a posting's own page for its full text", async () => {
+    const { postings } = await remotive.search({ ...EMPTY_QUERY, keywords: "engineer", country: "de" }, {}, null);
+    expect((await remotive.details(postings[0], {}))?.length).toBeGreaterThan(100);
   });
 });

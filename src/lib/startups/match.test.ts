@@ -63,9 +63,16 @@ describe("matching startups against the profile (#222)", () => {
     expect(fit.score).toBe(10 + 12 + 15 + 5 + 5 + 5);
   });
 
-  it("reads where a YC post hires from its title, and a hiring post from its first line", () => {
+  it("reads where a YC or Work at a Startup post hires from its title, and a hiring post from its first line", () => {
     expect(whereText(startup({ source: "YC", location: "SF", summary: "Acme (YC W24) Is Hiring in SF" }))).toBe("SF | Acme (YC W24) Is Hiring in SF");
+    expect(whereText(startup({ source: "WAAS", location: "Remote", summary: "Data pipelines — AI Engineer" }))).toBe("Remote | Data pipelines — AI Engineer");
     expect(whereText(startup())).toBe("Berlin, Germany | Acme | Android Engineer | Berlin, Germany | Onsite");
+  });
+
+  it("adds an early-stage startup named by Wellfound", () => {
+    const fit = matchStartup(startup({ source: "WELLFOUND", stage: "Early Stage", details: "Acme | Android Engineer | Berlin, Germany", postedAt: "2026-10-20T12:00:00Z" }), profile, berlin, now);
+    expect(fit.reasons).toContain("An early-stage startup");
+    expect(matchStartup(startup({ source: "WELLFOUND", stage: "Seed" }), profile, berlin, now).reasons).toContain("An early-stage startup");
   });
 
   it("stays between 0 and 100, with no reasons for a poor fit", () => {

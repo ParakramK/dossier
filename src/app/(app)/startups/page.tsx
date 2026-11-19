@@ -17,9 +17,9 @@ export const metadata: Metadata = { title: "Startups" };
 const VIEW_MARK_MS = 60 * 60 * 1000;
 
 /**
- * Startups that are hiring (#222): YC startups' job posts and Hacker News'
- * "Who is hiring?", ranked against the profile, with the addresses they
- * publish for applications.
+ * Startups that are hiring (#222): YC job posts, Hacker News' "Who is
+ * hiring?", YC's Work at a Startup, Wellfound and Himalayas, ranked against
+ * the profile, with the addresses they publish for applications.
  */
 export default async function StartupsPage({ searchParams }: PageProps<"/startups">) {
   const filter = startupFilterFromParams(await searchParams);

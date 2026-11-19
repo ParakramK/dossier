@@ -5,12 +5,15 @@ import { z } from "zod";
 // against the profile, with the addresses they publish for applications.
 // Shared by the server and the screen.
 
-export const STARTUP_SOURCES = ["YC", "HN"] as const;
+export const STARTUP_SOURCES = ["YC", "HN", "WAAS", "WELLFOUND", "HIMALAYAS"] as const;
 export type StartupSource = (typeof STARTUP_SOURCES)[number];
 
 export const STARTUP_SOURCE_INFO: Record<StartupSource, { name: string; kind: string }> = {
-  YC: { name: "Y Combinator", kind: "Job post" },
+  YC: { name: "Y Combinator", kind: "Job post on Hacker News" },
   HN: { name: "Hacker News", kind: "Who is hiring?" },
+  WAAS: { name: "Work at a Startup", kind: "YC job pages" },
+  WELLFOUND: { name: "Wellfound", kind: "Startup jobs" },
+  HIMALAYAS: { name: "Himalayas", kind: "Remote jobs" },
 };
 
 export const STARTUP_STATUSES = ["NEW", "SAVED", "CONTACTED", "DISMISSED"] as const;
@@ -77,6 +80,9 @@ export type StartupView = FoundStartup & {
   emailsCheckedAt: string | null;
   peopleCheckedAt: string | null;
   notes: string;
+  /** A four-sentence warm-introduction message, written for the user to send; "" when none. */
+  outreach: string;
+  outreachAt: string | null;
   /** The application started from it, if any. */
   applicationId: string | null;
 };

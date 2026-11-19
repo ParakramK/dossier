@@ -185,21 +185,34 @@ docker compose exec -e AI_LIVE=ollama app yarn vitest run src/lib/ai/providers.l
 
 ## Job search
 
-Find jobs (`/jobs`) searches the job source chosen in Settings → Job search: JSearch, Adzuna, FreeHire or the Bundesagentur für Arbeit. Until a choice is saved, `DOSSIER_JOBS_SOURCE` and the key variables decide (see `.env.example`). In the code, "job" already means a background task (`Job`, `src/lib/jobs`), so a job ad is a "posting", and job search lives in `src/lib/job-search`:
+Find jobs (`/jobs`) searches the job source chosen in Settings → Job search: JSearch, Adzuna, FreeHire, merojob, Remotive, Y Combinator or the Bundesagentur für Arbeit. Until a choice is saved, `DOSSIER_JOBS_SOURCE` and the key variables decide (see `.env.example`). In the code, "job" already means a background task (`Job`, `src/lib/jobs`), so a job ad is a "posting", and job search lives in `src/lib/job-search`:
 
 - `search.ts` and `sources.ts`: the query and posting shapes every source maps to, the URL format, and what each source covers. Shared with the browser.
-- One adapter per source (`jsearch.ts`, `adzuna.ts`, `arbeitsagentur.ts`, `freehire.ts`), behind `index.ts`, which checks the country, caches answers in memory for 30 minutes and logs a source that changed or isn't answering, without the search. Failures are a `JobSearchError` with a message for the screen.
-- `config.ts`: which source and key are in effect. Job source keys are encrypted like the AI key, each kind of secret under its own derived key (`src/lib/secrets.ts`). FreeHire needs no key; `DOSSIER_FREEHIRE_URL` points at a self-hosted catalogue when set.
+- One adapter per source (`jsearch.ts`, `adzuna.ts`, `arbeitsagentur.ts`, `freehire.ts`, `merojob.ts`, `remotive.ts`, `yc.ts`), behind `index.ts`, which checks the country, caches answers in memory for 30 minutes and logs a source that changed or isn't answering, without the search. Failures are a `JobSearchError` with a message for the screen.
+- `config.ts`: which source and key are in effect. Job source keys are encrypted like the AI key, each kind of secret under its own derived key (`src/lib/secrets.ts`). FreeHire, merojob, Remotive and Y Combinator need no key; `DOSSIER_FREEHIRE_URL` points at a self-hosted catalogue when set.
 - `src/lib/postings.ts`: the `Posting` table holds what the user saved, dismissed or started an application from. `src/lib/posting-searches.ts`: every search, kept with what it found (`PostingSearch`) until the user removes it, so opening one again asks the source nothing.
 
-The tests use answers in each source's shape (`src/test/job-search-fixtures.ts`). The live tests check the real services, and are skipped otherwise. JSearch and Adzuna spend searches from your plan; the Arbeitsagentur and FreeHire are free:
+The tests use answers in each source's shape (`src/test/job-search-fixtures.ts`). The live tests check the real services, and are skipped otherwise. JSearch and Adzuna spend searches from your plan; the Arbeitsagentur, FreeHire, merojob, Remotive and Y Combinator are free:
 
 ```bash
 docker compose exec -e JOBS_LIVE=jsearch -e JSEARCH_TEST_KEY=… app yarn vitest run src/lib/job-search/jsearch.live.test.ts
 docker compose exec -e JOBS_LIVE=arbeitsagentur app yarn vitest run src/lib/job-search/sources.live.test.ts
 docker compose exec -e JOBS_LIVE=adzuna -e ADZUNA_TEST_APP_ID=… -e ADZUNA_TEST_KEY=… app yarn vitest run src/lib/job-search/sources.live.test.ts
 docker compose exec -e JOBS_LIVE=freehire app yarn vitest run src/lib/job-search/sources.live.test.ts
+docker compose exec -e JOBS_LIVE=merojob,yc app yarn vitest run src/lib/job-search/sources.live.test.ts
 ```
+
+## Startups
+
+Startups (`/startups`) gathers hiring startups from five places: YC job posts on Hacker News (`sources/yc.ts`), the monthly “Who is hiring?” thread (`sources/hn.ts`), YC's Work at a Startup (`sources/waas.ts`), Wellfound role pages (`sources/wellfound.ts`) and Himalayas' public job feed (`sources/himalayas.ts`). Each refresh asks all five; one failing doesn't stop the others, and what each found or how it failed is kept in settings for the screen. The three boards keep only AI-related roles, and every adapter drops duplicate jobs by source and id. They read public pages only, and the Work at a Startup adapter reads its remote-only pages so the list stays work you can do from where you are.
+
+Startups are scored in code (`match.ts`), with no AI, and the address lookup is described in [Startups in PRIVACY.md](PRIVACY.md#startups). A warm introduction is a four-sentence note the `write-outreach` task writes (`src/lib/ai/tasks/warm-outreach.ts`) from the profile and the posting, pointing at one project with its exact link. `writeWarmOutreach` in the Startups actions keeps it on `Startup.outreach` (with `outreachAt`); Dossier never sends it, and the screen offers LinkedIn and X searches for the founder or head of AI.
+
+## Fellowships and scholarships
+
+Fellowships (`/fellowships`) is a curated catalogue in `src/lib/opportunities/catalog.ts`: AI safety fellowships, research roles, evaluation contract work, and funded CS master's degrees around the world, with the routes open from Nepal and remotely marked as priority. It is code rather than a feed because deadlines move and several programmes have no API, so every entry links to the programme's own page, which is the last word on dates and eligibility.
+
+`types.ts` holds the kinds, focuses, regions, statuses, filtering and the address format; `store.ts` keeps only the user's state in `OpportunityWatch`, keyed by the catalogue id, so updating the catalogue never wipes the list or its notes. Adding a programme means adding an entry with a unique id; the catalogue test checks ids, fields, links and that every scholarship is about a CS master's.
 
 ## Scoring
 
@@ -216,7 +229,7 @@ docker compose exec -e JEV_LIVE=compare app yarn vitest run src/lib/scoring/jev.
 
 ## Your data
 
-Settings → Your data exports everything (profile, custom themes, settings, applications with their history, documents, chat and notes, and the postings kept from Find jobs) as one JSON file, and imports such a file to restore it. An import replaces all data in one transaction, after writing a backup of the current data to `DOSSIER_DATA_DIR/backups` (default `/data`; `./data` in development, which git ignores). "Download all PDFs" zips every tailored document there too, in `downloads`, and removes the zip once it's downloaded.
+Settings → Your data exports everything (profile, custom themes, settings, applications with their history, documents, chat and notes, the postings kept from Find jobs, Startups and their warm introductions, and the fellowships watchlist) as one JSON file, and imports such a file to restore it. An import replaces all data in one transaction, after writing a backup of the current data to `DOSSIER_DATA_DIR/backups` (default `/data`; `./data` in development, which git ignores). "Download all PDFs" zips every tailored document there too, in `downloads`, and removes the zip once it's downloaded.
 
 With "Nightly backups" on (the default), the app writes the same export to `backups` every night at 03:00 server time and deletes backups older than `DOSSIER_BACKUP_RETENTION_DAYS` (14 by default). The timer runs inside the app process, so run a single instance of the app. These are the app's own backups: back up the PostgreSQL database itself too, the way your host does it (for example `pg_dump` on a schedule), or the SQLite file: stop the app and copy the file.
 

@@ -169,7 +169,9 @@ export function JobSearchSection({ initial }: { initial: JobSearchSettingsView }
             {source === "ARBEITSAGENTUR" && (
               <>
                 <ArbeitsagenturNote accepted={Boolean(view.arbeitsagentur.acceptedAt)} onAccept={acceptArbeitsagentur} />
-                <p className="text-sm text-muted">No key needed. The job agent doesn&apos;t search this source; choose JSearch, Adzuna or FreeHire for it.</p>
+                <p className="text-sm text-muted">
+                  No key needed. The job agent doesn&apos;t search this source; choose JSearch, Adzuna, FreeHire, merojob, Y Combinator or Remotive for it.
+                </p>
               </>
             )}
             {source === "FREEHIRE" && (
@@ -177,6 +179,23 @@ export function JobSearchSection({ initial }: { initial: JobSearchSettingsView }
                 {view.freehire.host === new URL(FREEHIRE_URL).host
                   ? `No key needed. Dossier searches FreeHire's public catalogue at ${view.freehire.host}.`
                   : `No key needed. Dossier searches your own FreeHire at ${view.freehire.host}.`}
+              </p>
+            )}
+            {source === "MEROJOB" && (
+              <p className="text-sm text-muted">
+                No key needed. Dossier searches merojob&apos;s public job API, which lists jobs across Nepal. A place it doesn&apos;t know searches the whole
+                country.
+              </p>
+            )}
+            {source === "YC" && (
+              <p className="text-sm text-muted">
+                No key needed. Dossier searches YC startups&apos; job posts on Hacker News from the last 90 days, wherever the job is.
+              </p>
+            )}
+            {source === "REMOTIVE" && (
+              <p className="text-sm text-muted">
+                No key needed. Dossier searches Remotive&apos;s remote job board, where each posting says which countries it&apos;s open to; a posting&apos;s
+                own page is read for its full text.
               </p>
             )}
 

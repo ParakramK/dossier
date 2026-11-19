@@ -662,6 +662,9 @@ enum PostingSource {
   ADZUNA
   ARBEITSAGENTUR
   FREEHIRE
+  MEROJOB
+  YC
+  REMOTIVE
 }
 
 /// A posting from Find jobs that the user kept (E14-5): saved, dismissed, or
@@ -881,6 +884,10 @@ model Startup {
   /// When its site was last checked for role addresses, and for people's.
   emailsCheckedAt    DateTime?
   peopleCheckedAt    DateTime?
+  /// A four-sentence warm-introduction message written for the user to
+  /// send themselves; "" when none was written.
+  outreach           String        @default("")
+  outreachAt         DateTime?
   notes              String        @default("")
   /// When a refresh last found it.
   seenAt             DateTime      @default(now())
@@ -900,6 +907,31 @@ model Startup {
 model StartupBlock {
   hash      String   @id
   createdAt DateTime @default(now())
+}
+
+/// Where a fellowship or scholarship stands for the user.
+enum OpportunityStatus {
+  INTERESTED
+  PREPARING
+  APPLIED
+  AWARDED
+  PASSED
+}
+
+/// What the user did with a fellowship or scholarship. The catalogue of
+/// opportunities itself lives in the code (src/lib/opportunities/catalog.ts);
+/// this only keeps the user's own state, so the catalogue can be updated
+/// without losing it.
+model OpportunityWatch {
+  /// The catalogue entry's id, e.g. "mats".
+  catalogId String            @id
+  status    OpportunityStatus @default(INTERESTED)
+  /// Notes in the user's words: requirements, a contact, what to prepare.
+  notes     String            @default("")
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([status])
 }
 
 // ─── Google: Gmail and Calendar (E15) ────────────────────────────────────────

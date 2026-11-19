@@ -10,15 +10,18 @@ import { saveSettings } from "@/lib/settings-data";
 
 import { SourceError } from "./http";
 import { placeOf } from "./place";
+import { fetchHimalayasStartups } from "./sources/himalayas";
 import { fetchHnStartups } from "./sources/hn";
+import { fetchWaasStartups } from "./sources/waas";
+import { fetchWellfoundStartups } from "./sources/wellfound";
 import { fetchYcStartups } from "./sources/yc";
 import { lookUpStartup, rescoreStartups, sweepStartups, upsertStartups } from "./store";
 import { STARTUP_SOURCE_INFO, startupsRefreshSchema, type FoundStartup, type StartupSource, type StartupsRefresh } from "./types";
 
 // "Refresh" on the Startups screen (#222), and once a day while the screen
-// is in use: asks both sources what's new, keeps it, scores it, and looks
+// is in use: asks every source what's new, keeps it, scores it, and looks
 // for role addresses on the best new matches' own sites. One source failing
-// doesn't stop the other; what happened is kept for the screen.
+// doesn't stop the others; what happened is kept for the screen.
 
 export const STARTUPS_JOB_KEY = "startups-refresh";
 /** Sites read for addresses per refresh: the best matches not checked yet. */
@@ -26,7 +29,7 @@ const SITE_LOOKUPS = 12;
 /** Different sites read at once; each site's own pages are read one at a time. */
 const SITE_CONCURRENCY = 4;
 
-/** Runs both sources, keeps what they found, and looks up addresses for the best new startups. */
+/** Runs every source, keeps what they found, and looks up addresses for the best new startups. */
 export async function refreshStartups(
   step: (name: string) => Promise<void> = async () => {},
   signal: AbortSignal = new AbortController().signal,
@@ -36,9 +39,12 @@ export async function refreshStartups(
   const sources: { source: StartupSource; fetch: () => Promise<FoundStartup[]> }[] = [
     { source: "YC", fetch: () => fetchYcStartups(signal) },
     { source: "HN", fetch: () => fetchHnStartups(place, signal) },
+    { source: "WAAS", fetch: () => fetchWaasStartups(signal) },
+    { source: "WELLFOUND", fetch: () => fetchWellfoundStartups(signal) },
+    { source: "HIMALAYAS", fetch: () => fetchHimalayasStartups(signal) },
   ];
 
-  await step("Asking Y Combinator and Hacker News");
+  await step("Asking Y Combinator, Hacker News, Wellfound and Himalayas");
   const results = await Promise.allSettled(sources.map((entry) => entry.fetch()));
   signal.throwIfAborted();
   const outcomes = results.map((result, index) => {

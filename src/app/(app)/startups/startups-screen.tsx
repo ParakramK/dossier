@@ -28,7 +28,7 @@ import {
   type StartupView,
 } from "@/lib/startups/types";
 
-import { lookUpStartupAddresses, refreshStartupsNow, removeStartupForGood, saveStartupNotes, setStartupStatus } from "./actions";
+import { lookUpStartupAddresses, refreshStartupsNow, removeStartupForGood, saveStartupNotes, setStartupStatus, writeWarmOutreach } from "./actions";
 
 export type StartupsScreenProps = {
   filter: StartupFilter;
@@ -53,9 +53,10 @@ const VIEWS: { status: StartupStatusName; label: string }[] = [
 ];
 
 /**
- * The Startups screen (#222): startups that are hiring, from YC startups' job
- * posts and Hacker News' "Who is hiring?", ranked against the profile, with
- * the addresses they publish for applications. Dossier sends nothing: the
+ * The Startups screen (#222): startups that are hiring, from YC job posts,
+ * Hacker News' "Who is hiring?", YC's Work at a Startup, Wellfound and
+ * Himalayas, ranked against the profile, with the addresses they publish for
+ * applications and a warm-introduction message. Dossier sends nothing: the
  * user writes to each one, from New application or their own mail.
  */
 export function StartupsScreen({ filter, list, lastRefresh, refreshJobId, city, country, headline, aiReady, today }: StartupsScreenProps) {
@@ -85,7 +86,7 @@ export function StartupsScreen({ filter, list, lastRefresh, refreshJobId, city, 
     <>
       <PageHeader
         title="Startups"
-        description="Startups that are hiring, from YC startups' job posts and Hacker News' “Who is hiring?”, ranked against your profile, with the address each one publishes for applications. You write to each one yourself."
+        description="Startups that are hiring, from YC job posts, Hacker News' “Who is hiring?”, YC's Work at a Startup, Wellfound and Himalayas, ranked against your profile. Each one keeps the address it publishes for applications and a warm-introduction message you can send yourself."
         actions={
           <Button aria-disabled={refreshing || starting || undefined} onClick={() => !refreshing && !starting && refresh()}>
             {refreshing ? "Refreshing…" : "Refresh"}
@@ -134,9 +135,9 @@ function RefreshStatus({ lastRefresh, refreshing, step, today }: { lastRefresh: 
     return (
       <div role="note" className="flex flex-col gap-2 rounded-panel border border-line-card bg-card px-6 py-5 text-sm text-pretty">
         <p>
-          Press <strong>Refresh</strong> to look for startups. Dossier reads YC startups&apos; job posts and this month&apos;s “Who is hiring?” thread on
-          Hacker News, keeps the ones that hire where you live or remotely, and looks on the best matches&apos; own sites for the address they publish for
-          applications, following their robots.txt.
+          Press <strong>Refresh</strong> to look for startups. Dossier reads YC&apos;s job posts, this month&apos;s “Who is hiring?” thread on Hacker
+          News, YC&apos;s Work at a Startup, Wellfound&apos;s AI roles and Himalayas&apos; remote AI roles, then looks on the best matches&apos; own sites
+          for the address they publish for applications, following their robots.txt.
         </p>
         <p className="text-muted">
           After that it refreshes once a day while you use this screen. Nothing is sent to anyone: you decide whom to write to.
@@ -145,19 +146,17 @@ function RefreshStatus({ lastRefresh, refreshing, step, today }: { lastRefresh: 
     );
   }
   const failed = lastRefresh.sources.filter((source) => source.error);
+  const found = lastRefresh.sources.filter((source) => !source.error && source.found > 0);
   return (
     <div className="flex flex-col gap-2 text-meta text-muted">
       <p>
         Last refreshed {formatDateTime(new Date(lastRefresh.at), undefined, new Date(today))}:{" "}
-        {lastRefresh.sources
-          .filter((source) => !source.error)
-          .map((source) => `${STARTUP_SOURCE_INFO[source.source].name} ${source.found}`)
-          .join(" · ")}
+        {found.length > 0 ? found.map((source) => `${STARTUP_SOURCE_INFO[source.source].name} ${source.found}`).join(" · ") : "nothing new"}
         .
       </p>
       {failed.length > 0 && (
         <p role="note" className="rounded-card bg-warning-surface px-4 py-2.5 text-warning">
-          {failed.map((source) => source.error).join("; ")}. {failed.length < lastRefresh.sources.length ? "The other one worked. " : ""}The next refresh tries again.
+          {failed.map((source) => source.error).join("; ")}. {failed.length < lastRefresh.sources.length ? "The others worked. " : ""}The next refresh tries again.
         </p>
       )}
     </div>
@@ -208,7 +207,7 @@ function Filters({ filter, city, country, onChange }: { filter: StartupFilter; c
         <option value="remote">Remote{country ? `, open to ${country}` : ""}</option>
       </Select>
       <Select label="Source" value={filter.source} onChange={(event) => onChange({ source: event.target.value as StartupFilter["source"] })}>
-        <option value="">Both sources</option>
+        <option value="">All sources</option>
         {STARTUP_SOURCES.map((source) => (
           <option key={source} value={source}>
             {STARTUP_SOURCE_INFO[source].name}
@@ -284,6 +283,22 @@ function StartupCard({ startup: initial, headline, aiReady, today }: { startup: 
     else toast(people ? "Their site doesn't publish anyone's own address." : "Their site doesn't publish an address for applications. Try their careers page.");
   };
 
+  const writeOutreach = async () => {
+    if (busy) return;
+    setBusy("outreach");
+    const result = toastResult(await writeWarmOutreach({ id: startup.id }));
+    setBusy(null);
+    if (!result.ok) return;
+    setStartup(result.data);
+    toast("Warm introduction written. Copy it into LinkedIn or X, and add their name.");
+  };
+
+  const copyOutreach = () =>
+    void navigator.clipboard.writeText(startup.outreach).then(
+      () => toast("Copied the warm introduction."),
+      () => toast("Couldn't copy it. Select the text instead."),
+    );
+
   const remove = async () => {
     setRemoving(false);
     if (toastResult(await removeStartupForGood({ id: startup.id })).ok) router.refresh();
@@ -325,6 +340,8 @@ function StartupCard({ startup: initial, headline, aiReady, today }: { startup: 
 
       <Emails emails={startup.emails} company={startup.company} headline={headline} peopleChecked={Boolean(startup.peopleCheckedAt)} />
 
+      {startup.outreach && <Outreach message={startup.outreach} company={startup.company} writtenAt={startup.outreachAt} today={today} onCopy={copyOutreach} />}
+
       <div className="flex flex-wrap items-center gap-2">
         {startup.applicationId ? (
           <Link href={`/applications/${startup.applicationId}`} className={buttonClassName("secondary", "sm")}>
@@ -339,6 +356,11 @@ function StartupCard({ startup: initial, headline, aiReady, today }: { startup: 
             Choose an AI provider to write an application
           </Link>
         ) : null}
+        {!blocked && aiReady && (
+          <Button size="sm" variant="secondary" aria-disabled={busy !== null || undefined} onClick={() => void writeOutreach()}>
+            {busy === "outreach" ? "Writing…" : startup.outreach ? "Write it again" : "Warm introduction"}
+          </Button>
+        )}
         {startup.website && !blocked && (
           <Button size="sm" variant="secondary" aria-disabled={busy !== null || undefined} onClick={() => void lookUp(false)}>
             {busy === "emails" ? "Looking…" : startup.emailsCheckedAt ? "Look on their site again" : "Find addresses on their site"}
@@ -413,6 +435,37 @@ function Notes({ id, initial }: { id: string; initial: string }) {
     if (toastResult(await saveStartupNotes({ id, notes })).ok) setSaved(notes);
   };
   return <Textarea label="Notes" rows={3} value={notes} maxLength={5_000} onChange={(event) => setNotes(event.target.value)} onBlur={() => void save()} />;
+}
+
+function Outreach({ message, company, writtenAt, today, onCopy }: { message: string; company: string; writtenAt: string | null; today: string; onCopy: () => void }) {
+  const linkedin = (role: string) => `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${company} ${role}`)}`;
+  const x = `https://x.com/search?q=${encodeURIComponent(`${company} founder`)}&src=typed_query&f=user`;
+  return (
+    <div className="flex flex-col gap-2 rounded-card border border-line-field bg-input px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-meta font-medium">Warm introduction</p>
+        <button type="button" onClick={onCopy} className="text-meta text-muted underline underline-offset-2 hover:text-ink">
+          Copy
+        </button>
+      </div>
+      <p className="text-sm whitespace-pre-wrap text-pretty">{message}</p>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-meta text-muted">
+        <a href={linkedin("founder")} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-ink">
+          Founder on LinkedIn ↗
+        </a>
+        <a href={linkedin("head of AI")} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-ink">
+          Head of AI on LinkedIn ↗
+        </a>
+        <a href={x} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-ink">
+          Founder on X ↗
+        </a>
+        {writtenAt && <span>Written {formatDateTime(new Date(writtenAt), undefined, new Date(today))}</span>}
+      </div>
+      <p className="text-meta text-muted">
+        Dossier wrote this from your profile and the posting. It sends nothing: open the person&apos;s profile, add their name, and send it yourself.
+      </p>
+    </div>
+  );
 }
 
 function Emails({ emails, company, headline, peopleChecked }: { emails: StartupEmail[]; company: string; headline: string; peopleChecked: boolean }) {

@@ -82,6 +82,18 @@ function startups(path: string, request: IncomingMessage, response: ServerRespon
   const page = `/${rest.join("/")}`;
   if (host === "hacker-news.firebaseio.com") return page in HN_API ? send(response, 200, HN_API[page]) : send(response, 404, null);
   if (host === "hn.algolia.com") return page in ALGOLIA ? send(response, 200, ALGOLIA[page]) : send(response, 404, {});
+  // The newer boards answer with no roles: the specs stay about Hacker News,
+  // and no request leaves the machine.
+  if (host === "www.ycombinator.com" && page.startsWith("/jobs/role/")) {
+    const data = JSON.stringify({ props: { jobPostings: [] } }).replaceAll("&", "&amp;").replaceAll('"', "&quot;");
+    return response.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(`<html><body><div data-page="${data}"></div></body></html>`);
+  }
+  if (host === "wellfound.com" && page.startsWith("/role/")) {
+    return response
+      .writeHead(200, { "content-type": "text/html; charset=utf-8" })
+      .end('<html><body><script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"apolloState":{"data":{"ROOT_QUERY":{"talent":{}}}}}}}</script></body></html>');
+  }
+  if (host === "himalayas.app" && page === "/jobs/api") return send(response, 200, { jobs: [], nextCursor: null });
   siteRequests.push({ url: `https://${host}${page}`, userAgent: String(request.headers["user-agent"] ?? "") });
   const body = SITES[host]?.[page];
   if (body === undefined) return response.writeHead(404, { "content-type": "text/html" }).end("<p>Not found</p>");
@@ -206,6 +218,37 @@ createServer((request, response) => {
         },
       ],
       meta: { total: 1, limit: 20, offset: 0 },
+    });
+  }
+
+  if (url.pathname === "/remotive/api/v2/jobs/search/") {
+    return send(response, 200, {
+      jsonrpc: "2.0",
+      id: null,
+      result: {
+        results: [
+          {
+            hits: [
+              {
+                id: "e2e-remotive",
+                title: "Senior Product Designer, Payments",
+                company_name: "Ledgerly",
+                locations: ["Netherlands", "Worldwide"],
+                url: "https://jobs.example/e2e-remotive",
+                salary: "€75,000–90,000",
+                category: "Design",
+                job_type: "full-time",
+                discovered_on: new Date(Date.now() - 2 * 86_400_000).toISOString().replace("T", " ").slice(0, 19),
+                remotive_com_url: "https://remotive.com/remote/jobs/design/e2e-remotive",
+              },
+            ],
+            nbHits: 1,
+            page: 0,
+            nbPages: 1,
+            hitsPerPage: 20,
+          },
+        ],
+      },
     });
   }
 

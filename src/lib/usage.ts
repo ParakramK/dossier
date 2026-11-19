@@ -13,6 +13,7 @@ export const USAGE_TASKS = [
   { task: "tailor-resume", label: "Writing resumes", hint: "Each application's tailored resume" },
   { task: "write-cover-letter", label: "Writing cover letters", hint: "Each application's cover letter" },
   { task: "write-email", label: "Writing emails", hint: "The email to send with an application" },
+  { task: "write-outreach", label: "Warm introductions", hint: "The four-sentence note to a startup's founder" },
   { task: "regenerate-unit", label: "Rewriting parts", hint: "One part of a resume or letter, written again" },
   { task: "refine-chat", label: "Refining in chat", hint: "Changes you ask for in an application's chat" },
   { task: "classify-reply", label: "Reading replies", hint: "Employers' mail from Gmail, read in the background" },

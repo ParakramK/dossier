@@ -53,6 +53,8 @@ export function startupView(row: Startup): StartupView {
     emailsCheckedAt: row.emailsCheckedAt?.toISOString() ?? null,
     peopleCheckedAt: row.peopleCheckedAt?.toISOString() ?? null,
     notes: row.notes,
+    outreach: row.outreach,
+    outreachAt: row.outreachAt?.toISOString() ?? null,
     applicationId: row.applicationId,
   };
 }
@@ -222,6 +224,12 @@ export async function getStartup(id: string): Promise<StartupView | null> {
   return row ? startupView(row) : null;
 }
 
+/** Keeps the warm-introduction message written for the user, and when it was written. */
+export async function saveStartupOutreach(id: string, message: string, now = new Date()): Promise<StartupView | null> {
+  const { count } = await prisma.startup.updateMany({ where: { id }, data: { outreach: message.slice(0, 5_000), outreachAt: now } });
+  return count > 0 ? getStartup(id) : null;
+}
+
 /** Saves what the user changed: its status, or the notes. */
 export async function updateStartup(id: string, change: { status?: StartupStatus; notes?: string }): Promise<StartupView | null> {
   const data: Prisma.StartupUpdateInput = {};
@@ -271,11 +279,12 @@ export async function sweepStartups(now = new Date()): Promise<{ removed: number
  * in Dossier and never go to the AI.
  */
 export function startupPostingText(startup: StartupView): string {
+  const titleFirst = startup.source === "YC" || startup.source === "WAAS";
   const lines = [
-    startup.source === "YC" ? startup.summary : "",
+    titleFirst ? startup.summary : "",
     startup.details || startup.summary,
     startup.location && `Location: ${startup.location}`,
-    startup.roles.length > 0 && startup.source === "YC" ? `Role: ${startup.roles.join(", ")}` : "",
+    startup.roles.length > 0 && titleFirst ? `Role: ${startup.roles.join(", ")}` : "",
   ];
   return withoutAddresses(lines.filter(Boolean).join("\n\n")).trim();
 }

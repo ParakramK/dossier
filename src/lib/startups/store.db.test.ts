@@ -13,6 +13,7 @@ import {
   markSentAsContacted,
   removeStartup,
   rescoreStartups,
+  saveStartupOutreach,
   startupPostingText,
   sweepStartups,
   updateStartup,
@@ -47,6 +48,9 @@ vi.mock("./emails", async (importOriginal) => ({
 }));
 const sources = vi.hoisted(() => ({ yc: [] as unknown[], hnFails: false }));
 vi.mock("./sources/yc", () => ({ fetchYcStartups: async () => sources.yc }));
+vi.mock("./sources/waas", () => ({ fetchWaasStartups: async () => [] }));
+vi.mock("./sources/wellfound", () => ({ fetchWellfoundStartups: async () => [] }));
+vi.mock("./sources/himalayas", () => ({ fetchHimalayasStartups: async () => [] }));
 vi.mock("./sources/hn", async () => {
   const { SourceError } = await import("./http");
   return {
@@ -99,6 +103,17 @@ describe("keeping startups (#222)", () => {
     await prisma().startup.update({ where: { id: row.id }, data: { status: "SAVED", notes: "Ask about Compose", emails: [address("jobs@acme.io")] } });
     expect(await upsertStartups([startup({ summary: "Now with tractors", website: "" })], now)).toBe(0);
     expect(await getStartup(row.id)).toMatchObject({ summary: "Now with tractors", website: "https://acme.io", status: "SAVED", notes: "Ask about Compose", emails: [{ email: "jobs@acme.io" }] });
+  });
+
+  it("keeps a warm-introduction message, trimmed to what the column holds", async () => {
+    await upsertStartups([startup()], now);
+    const [row] = await prisma().startup.findMany();
+    expect(await saveStartupOutreach(row.id, "Four sentences to the founder.", now)).toMatchObject({
+      outreach: "Four sentences to the founder.",
+      outreachAt: now.toISOString(),
+    });
+    expect((await saveStartupOutreach(row.id, "x".repeat(6_000), now))!.outreach).toHaveLength(5_000);
+    expect(await saveStartupOutreach("missing", "Hello.", now)).toBeNull();
   });
 
   it("leaves out startups removed for good: the post, its site or its name", async () => {
@@ -220,7 +235,7 @@ describe("keeping startups (#222)", () => {
 });
 
 describe("refreshing startups (#222)", () => {
-  it("keeps what both sources found, says which failed, and looks up the best new sites", async () => {
+  it("keeps what the sources found, says which failed, and looks up the best new sites", async () => {
     sources.yc = [startup({ source: "YC", externalId: "1" }), startup({ source: "YC", externalId: "2", company: "No site", website: "" })];
     sources.hnFails = true;
     web.emails = [address("jobs@acme.io")];
@@ -232,10 +247,13 @@ describe("refreshing startups (#222)", () => {
       sources: [
         { source: "YC", found: 2, error: null },
         { source: "HN", found: 0, error: "Hacker News took too long to answer" },
+        { source: "WAAS", found: 0, error: null },
+        { source: "WELLFOUND", found: 0, error: null },
+        { source: "HIMALAYAS", found: 0, error: null },
       ],
       emailsFound: 1,
     });
-    expect(steps).toEqual(["Asking Y Combinator and Hacker News", "Scoring 2 startups against your profile", "Looking for application addresses on their own sites"]);
+    expect(steps).toEqual(["Asking Y Combinator, Hacker News, Wellfound and Himalayas", "Scoring 2 startups against your profile", "Looking for application addresses on their own sites"]);
     expect(web.looked).toEqual(["https://acme.io"]);
     expect((await loadSettings()).startupsLastRefresh).toEqual(result);
 

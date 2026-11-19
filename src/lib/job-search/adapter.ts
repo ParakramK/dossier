@@ -14,6 +14,9 @@ export type SourceCredentials = {
   ADZUNA: { appId: string; key: string };
   ARBEITSAGENTUR: Record<string, never>;
   FREEHIRE: Record<string, never>;
+  MEROJOB: Record<string, never>;
+  YC: Record<string, never>;
+  REMOTIVE: Record<string, never>;
 };
 
 export type RequestContext = {

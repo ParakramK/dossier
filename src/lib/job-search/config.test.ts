@@ -86,6 +86,9 @@ describe("credentialsFor", () => {
     expect(credentialsFor(config, "JSEARCH")).toEqual({ key: "ak_saved", host: "rapidapi" });
     expect(credentialsFor({ ...config, arbeitsagentur: { offered: true, acceptedAt: ACCEPTED } }, "ARBEITSAGENTUR")).toEqual({});
     expect(credentialsFor(config, "FREEHIRE")).toEqual({});
+    expect(credentialsFor(config, "MEROJOB")).toEqual({});
+    expect(credentialsFor(config, "YC")).toEqual({});
+    expect(credentialsFor(config, "REMOTIVE")).toEqual({});
   });
 
   it("says what's missing", () => {
@@ -140,6 +143,17 @@ describe("requestContext", () => {
     expect(requestContext("FREEHIRE", "http://127.0.0.1:3998/", "https://jobs.example")).toEqual({
       baseUrl: "http://127.0.0.1:3998/freehire",
     });
+    expect(requestContext("MEROJOB", "http://127.0.0.1:3998/")).toEqual({ baseUrl: "http://127.0.0.1:3998/merojob" });
+    expect(requestContext("YC", "http://127.0.0.1:3998/")).toEqual({ baseUrl: "http://127.0.0.1:3998/yc" });
+    expect(requestContext("REMOTIVE", "http://127.0.0.1:3998/")).toEqual({ baseUrl: "http://127.0.0.1:3998/remotive" });
+  });
+});
+
+describe("merojob, Y Combinator and Remotive from the environment", () => {
+  it("chooses each when DOSSIER_JOBS_SOURCE says so", () => {
+    expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "merojob" }).source).toBe("MEROJOB");
+    expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "yc" }).source).toBe("YC");
+    expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "remotive" }).source).toBe("REMOTIVE");
   });
 });
 

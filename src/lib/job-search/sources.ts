@@ -92,6 +92,43 @@ export const SOURCE_INFO: Record<JobSource, SourceInfo> = {
     // It has a city filter, but only for the names it knows, and a country with it widens rather than narrows.
     radius: false,
   },
+  MEROJOB: {
+    name: "merojob",
+    description: "Nepal's job board, with each posting's full text, the salary where the employer shows it, and jobs across the country.",
+    tag: "Nepal only · free, no key · no distance filter",
+    keyUrl: null,
+    quotaPeriod: null,
+    attribution: "Jobs from merojob.com",
+    attributionLink: null,
+    countries: ["np"],
+    // Its place filter takes only its own list of districts and cities.
+    radius: false,
+  },
+  YC: {
+    name: "Y Combinator",
+    description: "Job posts from YC-funded startups on Hacker News, worldwide, with each posting's own page read for its text.",
+    tag: "Worldwide · free, no key · last 90 days",
+    keyUrl: null,
+    quotaPeriod: null,
+    attribution: "Job posts on Hacker News",
+    attributionLink: null,
+    countries: null,
+    // A title says where the job is, not how far it is from you.
+    radius: false,
+  },
+  REMOTIVE: {
+    name: "Remotive",
+    description: "A remote-only board: each posting says where it can be done, and its own page is read for the full text.",
+    tag: "Worldwide, remote · free, no key · no distance filter",
+    keyUrl: null,
+    quotaPeriod: null,
+    attribution: "Jobs from Remotive",
+    // Its terms ask for a link back to Remotive and its name beside the results.
+    attributionLink: { home: "https://remotive.com", local: /^remotive\.com$/ },
+    countries: null,
+    // Every posting is remote, so a distance from the place means nothing.
+    radius: false,
+  },
 };
 
 /** FreeHire's public catalogue; DOSSIER_FREEHIRE_URL can name a self-hosted one instead. */

@@ -10,17 +10,29 @@ import type { JobSource } from "./search";
 export const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_BYTES = 5 * 1024 * 1024;
 
-/** GETs JSON from a source, turning every failure into a JobSearchError; `timeoutMs` for a source that needs longer. */
+/**
+ * GETs JSON from a source, or POSTs `body` as JSON, turning every failure
+ * into a JobSearchError; `timeoutMs` for a source that needs longer, and
+ * `forbidden` for how to read a 403 from a source without a key.
+ */
 export async function requestJson(
   source: JobSource,
   url: URL,
-  { headers = {}, signal, timeoutMs = REQUEST_TIMEOUT_MS }: { headers?: Record<string, string>; signal?: AbortSignal; timeoutMs?: number } = {},
+  {
+    headers = {},
+    body,
+    forbidden = "key",
+    signal,
+    timeoutMs = REQUEST_TIMEOUT_MS,
+  }: { headers?: Record<string, string>; body?: unknown; forbidden?: "key" | "unavailable"; signal?: AbortSignal; timeoutMs?: number } = {},
 ): Promise<unknown> {
   const timeout = AbortSignal.timeout(timeoutMs);
   let response: Response;
   try {
     response = await fetch(url, {
-      headers: { accept: "application/json", ...headers },
+      method: body === undefined ? "GET" : "POST",
+      headers: { accept: "application/json", ...(body === undefined ? {} : { "content-type": "application/json" }), ...headers },
+      body: body === undefined ? undefined : JSON.stringify(body),
       signal: signal ? AbortSignal.any([signal, timeout]) : timeout,
       cache: "no-store",
     });
@@ -30,7 +42,7 @@ export async function requestJson(
   }
 
   const detail = `${url.pathname}: HTTP ${response.status}`;
-  if (response.status === 401 || response.status === 403) throw jobSearchError("key", source, { detail });
+  if (response.status === 401 || response.status === 403) throw jobSearchError(forbidden, source, { detail });
   if (response.status === 429) throw jobSearchError("quota", source, { detail });
   if (!response.ok) throw jobSearchError(response.status >= 500 ? "unavailable" : "changed", source, { detail });
 
