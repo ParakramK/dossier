@@ -11,6 +11,15 @@ COMPOSE_FILE="${COMPOSE_FILE:-compose.yml}"
 BACKUP_DIR="${BACKUP_DIR:-./backups}"
 SQL="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)/migrate-existing-db.sql"
 
+# Once the feature image has started, OpportunityWatch exists. Leave the
+# database alone from then on: re-copying the profile would overwrite edits
+# made in the feature build's own screens.
+if [ "$(docker compose -f "$COMPOSE_FILE" exec -T db psql -U dossier -d dossier -tAc \
+  "select count(*) from pg_tables where tablename = 'OpportunityWatch'")" = "1" ]; then
+  echo "Database is already on the feature schema; nothing to migrate."
+  exit 0
+fi
+
 mkdir -p "$BACKUP_DIR"
 stamp=$(date -u +%Y%m%dT%H%M%SZ)
 backup="$BACKUP_DIR/dossier-before-features-$stamp.dump"
