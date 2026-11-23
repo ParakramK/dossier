@@ -5,6 +5,8 @@ import { z } from "zod";
 import { fetchPosting } from "@/lib/posting-fetch";
 import { htmlToText } from "@/lib/startups/text";
 
+import type { PortalFields } from "@/lib/portals/engine";
+
 import type { JobSourceAdapter, RequestContext } from "./adapter";
 import { countryName } from "./countries";
 import { jobSearchError } from "./errors";
@@ -246,7 +248,7 @@ function requestBody(query: SearchQuery, page: number): unknown {
   return { requests: [{ indexName: "remotive_unlimited", params: params.toString() }] };
 }
 
-async function searchPage(query: SearchQuery, _credentials: Record<string, never>, next: string | null, context: RequestContext = {}): Promise<SearchPage> {
+async function searchPage(query: SearchQuery, _credentials: PortalFields, next: string | null, context: RequestContext = {}): Promise<SearchPage> {
   const page = pageNumber(next);
   const url = searchUrl(context.baseUrl);
   const answer = responseSchema.safeParse(

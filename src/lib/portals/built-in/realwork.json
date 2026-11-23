@@ -1,0 +1,59 @@
+{
+  "format": 1,
+  "id": "REALWORK",
+  "name": "Real Work From Anywhere",
+  "version": "1.0.0",
+  "description": "Jobs open anywhere in the world.",
+  "tag": "Work from anywhere · free, no key",
+  "keyUrl": null,
+  "countries": null,
+  "kinds": [
+    "any"
+  ],
+  "radius": false,
+  "hosts": [
+    "www.realworkfromanywhere.com"
+  ],
+  "base": "https://www.realworkfromanywhere.com",
+  "credit": {
+    "text": "Jobs from Real Work From Anywhere",
+    "link": "https://www.realworkfromanywhere.com"
+  },
+  "consent": null,
+  "postingPage": null,
+  "timeoutSeconds": 20,
+  "minGapSeconds": 0,
+  "maxMegabytes": 5,
+  "maps": {},
+  "kind": "json",
+  "search": {
+    "url": "{base}/",
+    "params": [
+      {
+        "name": "q",
+        "value": "{keywords}"
+      }
+    ],
+    "paging": {
+      "type": "none"
+    },
+    "items": "data",
+    "localFilter": true,
+    "posting": {
+      "id": "id",
+      "title": "title",
+      "company": "company",
+      "place": "location",
+      "url": "url",
+      "description": "description"
+    }
+  },
+  "details": {
+    "type": "none"
+  },
+  "test": {
+    "keywords": "engineer",
+    "place": "",
+    "country": "us"
+  }
+}

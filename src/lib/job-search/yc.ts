@@ -6,6 +6,8 @@ import { fetchPosting } from "@/lib/posting-fetch";
 import { hnItemLink, readJobTitle } from "@/lib/startups/sources/yc";
 import { htmlToText } from "@/lib/startups/text";
 
+import type { PortalFields } from "@/lib/portals/engine";
+
 import type { JobSourceAdapter, RequestContext } from "./adapter";
 import { jobSearchError } from "./errors";
 import { requestJson } from "./http";
@@ -114,7 +116,7 @@ function pageNumber(next: string | null): number {
   return Math.max(0, Number(next.slice("page:".length)) || 0);
 }
 
-async function searchPage(query: SearchQuery, _credentials: Record<string, never>, next: string | null, context: RequestContext = {}): Promise<SearchPage> {
+async function searchPage(query: SearchQuery, _credentials: PortalFields, next: string | null, context: RequestContext = {}): Promise<SearchPage> {
   const page = pageNumber(next);
   const url = searchUrl(query, page, context.baseUrl);
   const answer = responseSchema.safeParse(await requestJson("YC", url, { signal: context.signal, timeoutMs: TIMEOUT_MS }));

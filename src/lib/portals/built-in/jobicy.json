@@ -1,0 +1,59 @@
+{
+  "format": 1,
+  "id": "JOBICY",
+  "name": "Jobicy",
+  "version": "1.0.0",
+  "description": "Remote engineering jobs from Jobicy's public API, with salary.",
+  "tag": "Worldwide, remote · free, no key",
+  "keyUrl": null,
+  "countries": null,
+  "kinds": [
+    "tech"
+  ],
+  "radius": false,
+  "hosts": [
+    "jobicy.com"
+  ],
+  "base": "https://jobicy.com",
+  "credit": {
+    "text": "Jobs from Jobicy",
+    "link": "https://jobicy.com"
+  },
+  "consent": null,
+  "postingPage": null,
+  "timeoutSeconds": 20,
+  "minGapSeconds": 0,
+  "maxMegabytes": 5,
+  "maps": {},
+  "kind": "json",
+  "search": {
+    "url": "{base}/",
+    "params": [
+      {
+        "name": "q",
+        "value": "{keywords}"
+      }
+    ],
+    "paging": {
+      "type": "none"
+    },
+    "items": "data",
+    "localFilter": true,
+    "posting": {
+      "id": "id",
+      "title": "title",
+      "company": "company",
+      "place": "location",
+      "url": "url",
+      "description": "description"
+    }
+  },
+  "details": {
+    "type": "none"
+  },
+  "test": {
+    "keywords": "engineer",
+    "place": "",
+    "country": "us"
+  }
+}

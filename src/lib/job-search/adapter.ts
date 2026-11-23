@@ -1,42 +1,27 @@
 import "server-only";
 
-import type { FoundPosting, JobSource, JSearchHost, SearchPage, SearchQuery } from "./search";
+import type { PortalFields } from "@/lib/portals/engine";
 
-// What every job source implements (E14-1). Adapters turn a source's own
-// request and answer into the shared query and posting shapes, and every
-// failure into a JobSearchError.
+import type { FoundPosting, SearchPage, SearchQuery } from "./search";
 
-export type { JSearchHost };
+// What the job search hands a source (E14-1). Every built-in source runs on
+// the portal engine since E22-2 (src/lib/portals); its credentials are its
+// config's field values, by field name.
 
-/** What each source needs to be asked. */
-export type SourceCredentials = {
-  JSEARCH: { key: string; host: JSearchHost };
-  ADZUNA: { appId: string; key: string };
-  ARBEITSAGENTUR: Record<string, never>;
-  FREEHIRE: Record<string, never>;
-  MEROJOB: Record<string, never>;
-  YC: Record<string, never>;
-  REMOTIVE: Record<string, never>;
-  ARBEITNOW: Record<string, never>;
-  JOBICY: Record<string, never>;
-  REMOTEOK: Record<string, never>;
-  NODESK: Record<string, never>;
-  REALWORK: Record<string, never>;
-  WEWORKREMOTELY: Record<string, never>;
+/**
+ * The older hand-written adapters (merojob, Remotive, YC and the remote
+ * boards) still use this shape; their portals are registered in built-in.ts
+ * and their adapters are picked in portals/adapters.ts.
+ */
+export type JobSourceAdapter<S extends string = string> = {
+  source: S;
+  search: (query: SearchQuery, credentials: PortalFields, next: string | null, context?: RequestContext) => Promise<SearchPage>;
+  details: (posting: FoundPosting, credentials: PortalFields, context?: RequestContext) => Promise<string | null>;
+  test: (credentials: PortalFields, context?: RequestContext) => Promise<void>;
 };
 
 export type RequestContext = {
-  /** Replaces the source's own address; for the end-to-end tests' fake source. */
+  /** Replaces the source's own address; for the end-to-end tests' fake source, or a self-hosted FreeHire. */
   baseUrl?: string;
   signal?: AbortSignal;
-};
-
-export type JobSourceAdapter<S extends JobSource> = {
-  source: S;
-  /** One page of results (the countries it covers are checked before, see SOURCE_INFO); `next` comes from the page before, null for the first. */
-  search: (query: SearchQuery, credentials: SourceCredentials[S], next: string | null, context?: RequestContext) => Promise<SearchPage>;
-  /** The whole posting's text when the search only gave its start, or null when it can't be had. */
-  details: (posting: FoundPosting, credentials: SourceCredentials[S], context?: RequestContext) => Promise<string | null>;
-  /** The smallest request that shows the source answers and takes the key. */
-  test: (credentials: SourceCredentials[S], context?: RequestContext) => Promise<void>;
 };

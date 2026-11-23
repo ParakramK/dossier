@@ -1,6 +1,7 @@
 import "server-only";
 
 import { fetchPosting } from "@/lib/posting-fetch";
+import type { PortalFields } from "@/lib/portals/engine";
 import { htmlToText } from "@/lib/startups/text";
 
 import type { JobSourceAdapter, RequestContext } from "./adapter";
@@ -267,13 +268,13 @@ function adapterFor<S extends BoardSource>(source: S): JobSourceAdapter<S> {
   if (!board) throw new Error(`No remote board ${source}.`);
   return {
     source,
-    search: (query: SearchQuery, _credentials: Record<string, never>, next: string | null, context: RequestContext = {}) => searchPage(board, query, next, context),
+    search: (query: SearchQuery, _credentials: PortalFields, next: string | null, context: RequestContext = {}) => searchPage(board, query, next, context),
     details: async (posting: FoundPosting) => {
       if (posting.complete) return posting.description;
       const page = await fetchPosting(posting.url);
       return page.ok ? page.text : null;
     },
-    test: async (_credentials: Record<string, never>, context: RequestContext = {}) => {
+    test: async (_credentials: PortalFields, context: RequestContext = {}) => {
       await searchPage(board, { keywords: "engineer", place: "", country: "", radiusKm: 25, remoteOnly: false, postedWithin: "any" }, null, context);
     },
   };

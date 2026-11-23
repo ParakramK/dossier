@@ -1,0 +1,59 @@
+{
+  "format": 1,
+  "id": "NODESK",
+  "name": "NoDesk",
+  "version": "1.0.0",
+  "description": "Remote jobs from NoDesk's public feed.",
+  "tag": "Worldwide, remote · free, no key",
+  "keyUrl": null,
+  "countries": null,
+  "kinds": [
+    "any"
+  ],
+  "radius": false,
+  "hosts": [
+    "nodesk.co"
+  ],
+  "base": "https://nodesk.co",
+  "credit": {
+    "text": "Jobs from NoDesk",
+    "link": "https://nodesk.co"
+  },
+  "consent": null,
+  "postingPage": null,
+  "timeoutSeconds": 20,
+  "minGapSeconds": 0,
+  "maxMegabytes": 5,
+  "maps": {},
+  "kind": "json",
+  "search": {
+    "url": "{base}/",
+    "params": [
+      {
+        "name": "q",
+        "value": "{keywords}"
+      }
+    ],
+    "paging": {
+      "type": "none"
+    },
+    "items": "data",
+    "localFilter": true,
+    "posting": {
+      "id": "id",
+      "title": "title",
+      "company": "company",
+      "place": "location",
+      "url": "url",
+      "description": "description"
+    }
+  },
+  "details": {
+    "type": "none"
+  },
+  "test": {
+    "keywords": "engineer",
+    "place": "",
+    "country": "us"
+  }
+}

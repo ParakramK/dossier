@@ -7,7 +7,7 @@ import type { JobSource } from "./search";
 // fetching a posting (src/lib/posting-fetch.ts) there's no address to guard;
 // requests are still limited in time and size.
 
-export const REQUEST_TIMEOUT_MS = 10_000;
+const REQUEST_TIMEOUT_MS = 10_000;
 const MAX_BYTES = 5 * 1024 * 1024;
 
 /**
@@ -86,7 +86,7 @@ export async function requestText(
 }
 
 /** The body as text, or null when it's bigger than `limit` bytes. */
-async function readLimited(response: Response, limit: number): Promise<string | null> {
+export async function readLimited(response: Response, limit: number): Promise<string | null> {
   if (!response.body) return "";
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];

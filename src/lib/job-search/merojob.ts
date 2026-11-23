@@ -4,6 +4,8 @@ import { z } from "zod";
 
 import { htmlToText } from "@/lib/startups/text";
 
+import type { PortalFields } from "@/lib/portals/engine";
+
 import type { JobSourceAdapter, RequestContext } from "./adapter";
 import { jobSearchError } from "./errors";
 import { requestJson } from "./http";
@@ -200,7 +202,7 @@ function matchesKeywords(posting: FoundPosting, keywords: string): boolean {
   return terms.every((term) => text.includes(term));
 }
 
-async function searchPage(query: SearchQuery, _credentials: Record<string, never>, next: string | null, context: RequestContext = {}): Promise<SearchPage> {
+async function searchPage(query: SearchQuery, _credentials: PortalFields, next: string | null, context: RequestContext = {}): Promise<SearchPage> {
   const offset = pageOffset(next);
   const url = searchUrl(query, offset, context.baseUrl);
   const answer = responseSchema.safeParse(await requestJson("MEROJOB", url, { signal: context.signal, timeoutMs: TIMEOUT_MS }));
