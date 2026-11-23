@@ -94,6 +94,30 @@ BEGIN
   END LOOP;
 END $$;
 
+-- 1.15 searched several portals at once and left PostingSearch.source null
+-- (the portals are listed in its "portals" column). The feature build shows
+-- one source per search, so name the portal that found the most postings.
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'PostingSearch' AND column_name = 'portals'
+  ) THEN
+    UPDATE "PostingSearch"
+       SET "source" = (
+         SELECT (portal ->> 'id')::"PostingSource"
+         FROM jsonb_array_elements("portals") AS portal
+         WHERE portal ->> 'id' IN (
+           SELECT enumlabel FROM pg_enum WHERE enumtypid = 'PostingSource'::regtype
+         )
+         ORDER BY (portal ->> 'found')::integer DESC NULLS LAST
+         LIMIT 1
+       )
+     WHERE "source" IS NULL;
+    UPDATE "PostingSearch" SET "source" = 'JSEARCH'::"PostingSource" WHERE "source" IS NULL;
+  END IF;
+END $$;
+
 -- The feature build scores a posting by (source, externalId); 1.15's primary
 -- key has a third column, so give Prisma's upsert the unique index it expects.
 CREATE UNIQUE INDEX IF NOT EXISTS "PostingScore_source_externalId_key"
