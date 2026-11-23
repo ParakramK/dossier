@@ -46,7 +46,7 @@ echo "4/6  Back up and migrate the live database"
 printf 'Migrate the live database in %s? [y/N] ' "$DEPLOY"
 read -r answer
 case "$answer" in y|Y) ;; *) echo "Stopped before the database."; exit 1 ;; esac
-"$REPO/scripts/migrate-existing-db.sh"
+COMPOSE_FILE="$COMPOSE" BACKUP_DIR="$DEPLOY/backups" "$REPO/scripts/migrate-existing-db.sh"
 
 echo "5/6  Point .env at the GHCR image"
 cp "$ENV_FILE" "$ENV_FILE.bak"

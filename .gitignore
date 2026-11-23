@@ -66,3 +66,6 @@ next-env.d.ts
 desktop/**/.yarn
 desktop/**/node_modules
 desktop/**/test-results
+
+# Database dumps taken before a migration
+*.dump
