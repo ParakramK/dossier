@@ -13,7 +13,7 @@ REPO=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 DEPLOY=$(CDPATH= cd -- "$REPO/.." && pwd)
 COMPOSE="$DEPLOY/compose.yml"
 ENV_FILE="$DEPLOY/.env"
-BRANCH=feature/extra-job-sources
+BRANCH=$(git branch --show-current)
 IMAGE=parakramk/dossier:features
 
 echo "1/5  Push $BRANCH to your fork"
