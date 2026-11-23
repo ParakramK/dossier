@@ -4,7 +4,7 @@ name: Feature image
 # public, so the image can be pulled without a token.
 on:
   push:
-    branches: [feature/maharshi-sources]
+    branches: [feature/extra-job-sources]
   workflow_dispatch:
 
 permissions:

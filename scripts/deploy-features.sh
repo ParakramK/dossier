@@ -14,7 +14,7 @@ REPO=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 DEPLOY=$(CDPATH= cd -- "$REPO/.." && pwd)
 COMPOSE="$DEPLOY/compose.yml"
 ENV_FILE="$DEPLOY/.env"
-BRANCH=feature/maharshi-sources
+BRANCH=feature/extra-job-sources
 IMAGE=ghcr.io/parakramk/dossier:features
 
 echo "1/6  Push $BRANCH to your fork"
@@ -28,13 +28,13 @@ sha=$(git rev-parse HEAD)
 run=""
 i=0
 while [ -z "$run" ] && [ "$i" -lt 12 ]; do
-  run=$(gh run list --workflow feature-image.yml --branch "$BRANCH" --limit 20 \
+  run=$(gh run list --repo ParakramK/dossier --branch "$BRANCH" --limit 20 \
     --json databaseId,headSha --jq ".[] | select(.headSha == \"$sha\") | .databaseId" 2>/dev/null | head -1)
   [ -n "$run" ] || sleep 5
   i=$((i + 1))
 done
 [ -n "$run" ] || { echo "No Actions run appeared for this commit." >&2; exit 1; }
-gh run watch "$run" --compact --exit-status
+gh run watch "$run" --repo ParakramK/dossier --compact --exit-status
 
 echo "3/6  Pull $IMAGE"
 if [ -n "${GHCR_TOKEN:-}" ]; then
