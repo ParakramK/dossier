@@ -17,6 +17,12 @@ export type SourceCredentials = {
   MEROJOB: Record<string, never>;
   YC: Record<string, never>;
   REMOTIVE: Record<string, never>;
+  ARBEITNOW: Record<string, never>;
+  JOBICY: Record<string, never>;
+  REMOTEOK: Record<string, never>;
+  NODESK: Record<string, never>;
+  REALWORK: Record<string, never>;
+  WEWORKREMOTELY: Record<string, never>;
 };
 
 export type RequestContext = {

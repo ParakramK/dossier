@@ -198,6 +198,11 @@ export function JobSearchSection({ initial }: { initial: JobSearchSettingsView }
                 own page is read for its full text.
               </p>
             )}
+            {["ARBEITNOW", "JOBICY", "REMOTEOK", "NODESK", "REALWORK", "WEWORKREMOTELY"].includes(source) && (
+              <p className="text-sm text-muted">
+                No key needed. Dossier reads {SOURCE_INFO[source].name}&apos;s public remote job feed; keywords and dates are filtered on your server.
+              </p>
+            )}
 
             {testable && (
               <div className="flex flex-wrap items-center gap-3.5 pt-1">

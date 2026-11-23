@@ -12,7 +12,7 @@ import { SOURCE_INFO } from "./sources";
 // In this code "job" already means a background task (src/lib/jobs), so a
 // job ad is a "posting".
 
-/** The job sources Dossier can search (E14-1 to E14-3, FreeHire, merojob, Y Combinator, Remotive), in the order Settings lists them; one is chosen there. */
+/** The job sources Dossier can search, in the order Settings lists them; one is chosen there. */
 export const JOB_SOURCES = [
   PostingSource.JSEARCH,
   PostingSource.ADZUNA,
@@ -21,6 +21,12 @@ export const JOB_SOURCES = [
   PostingSource.MEROJOB,
   PostingSource.YC,
   PostingSource.REMOTIVE,
+  PostingSource.ARBEITNOW,
+  PostingSource.JOBICY,
+  PostingSource.REMOTEOK,
+  PostingSource.NODESK,
+  PostingSource.REALWORK,
+  PostingSource.WEWORKREMOTELY,
 ] as const;
 export type JobSource = PostingSource;
 

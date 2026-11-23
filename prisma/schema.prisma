@@ -665,6 +665,12 @@ enum PostingSource {
   MEROJOB
   YC
   REMOTIVE
+  ARBEITNOW
+  JOBICY
+  REMOTEOK
+  NODESK
+  REALWORK
+  WEWORKREMOTELY
 }
 
 /// A posting from Find jobs that the user kept (E14-5): saved, dismissed, or

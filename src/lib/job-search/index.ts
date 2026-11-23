@@ -11,6 +11,7 @@ import { arbeitsagentur } from "./arbeitsagentur";
 import { freehire } from "./freehire";
 import { jsearch } from "./jsearch";
 import { merojob } from "./merojob";
+import { arbeitnow, jobicy, nodesk, realwork, remoteok, weworkremotely } from "./remote-boards";
 import { remotive } from "./remotive";
 import { postingKey, type FoundPosting, type JobSource, type SearchPage, type SearchQuery } from "./search";
 import { sourceCovers } from "./sources";
@@ -32,6 +33,12 @@ const ADAPTERS: { [S in JobSource]: JobSourceAdapter<S> } = {
   MEROJOB: merojob,
   YC: yc,
   REMOTIVE: remotive,
+  ARBEITNOW: arbeitnow,
+  JOBICY: jobicy,
+  REMOTEOK: remoteok,
+  NODESK: nodesk,
+  REALWORK: realwork,
+  WEWORKREMOTELY: weworkremotely,
 };
 
 const adapterFor = <S extends JobSource>(source: S) => ADAPTERS[source] as JobSourceAdapter<S>;

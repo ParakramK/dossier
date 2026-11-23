@@ -89,6 +89,12 @@ describe("credentialsFor", () => {
     expect(credentialsFor(config, "MEROJOB")).toEqual({});
     expect(credentialsFor(config, "YC")).toEqual({});
     expect(credentialsFor(config, "REMOTIVE")).toEqual({});
+    expect(credentialsFor(config, "ARBEITNOW")).toEqual({});
+    expect(credentialsFor(config, "JOBICY")).toEqual({});
+    expect(credentialsFor(config, "REMOTEOK")).toEqual({});
+    expect(credentialsFor(config, "NODESK")).toEqual({});
+    expect(credentialsFor(config, "REALWORK")).toEqual({});
+    expect(credentialsFor(config, "WEWORKREMOTELY")).toEqual({});
   });
 
   it("says what's missing", () => {
@@ -146,6 +152,7 @@ describe("requestContext", () => {
     expect(requestContext("MEROJOB", "http://127.0.0.1:3998/")).toEqual({ baseUrl: "http://127.0.0.1:3998/merojob" });
     expect(requestContext("YC", "http://127.0.0.1:3998/")).toEqual({ baseUrl: "http://127.0.0.1:3998/yc" });
     expect(requestContext("REMOTIVE", "http://127.0.0.1:3998/")).toEqual({ baseUrl: "http://127.0.0.1:3998/remotive" });
+    expect(requestContext("ARBEITNOW", "http://127.0.0.1:3998/")).toEqual({ baseUrl: "http://127.0.0.1:3998/arbeitnow" });
   });
 });
 
@@ -154,6 +161,12 @@ describe("merojob, Y Combinator and Remotive from the environment", () => {
     expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "merojob" }).source).toBe("MEROJOB");
     expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "yc" }).source).toBe("YC");
     expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "remotive" }).source).toBe("REMOTIVE");
+    expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "arbeitnow" }).source).toBe("ARBEITNOW");
+    expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "jobicy" }).source).toBe("JOBICY");
+    expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "remoteok" }).source).toBe("REMOTEOK");
+    expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "nodesk" }).source).toBe("NODESK");
+    expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "realwork" }).source).toBe("REALWORK");
+    expect(resolveJobSearchConfig(nothingSaved, { DOSSIER_JOBS_SOURCE: "weworkremotely" }).source).toBe("WEWORKREMOTELY");
   });
 });
 

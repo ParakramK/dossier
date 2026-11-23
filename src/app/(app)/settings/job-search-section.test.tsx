@@ -47,6 +47,12 @@ describe("JobSearchSection", () => {
       "merojob",
       "Y Combinator",
       "Remotive",
+      "Arbeitnow",
+      "Jobicy",
+      "Remote OK",
+      "NoDesk",
+      "Real Work From Anywhere",
+      "We Work Remotely",
       "Off",
     ]);
     expect(screen.getByRole("radio", { name: "Off" })).toBeChecked();
@@ -138,6 +144,12 @@ describe("JobSearchSection", () => {
       "merojob",
       "Y Combinator",
       "Remotive",
+      "Arbeitnow",
+      "Jobicy",
+      "Remote OK",
+      "NoDesk",
+      "Real Work From Anywhere",
+      "We Work Remotely",
       "Off",
     ]);
   });
