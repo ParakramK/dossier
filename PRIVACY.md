@@ -121,7 +121,7 @@ Disallow: /
 
 ### Cold emails
 
-A cold email is written on the Startups screen after you press **Draft with AI**: Dossier reads the company's own public pages, and sends the profile, the post and that public text to the AI provider you chose. You review and can edit the subject and message before anything goes out. **Send cold email** sends it from your connected Google account with your base resume PDF attached, keeps a copy in Dossier and marks the startup contacted. Dossier never sends cold emails on its own.
+A cold email is written on the Startups screen after you press **Draft with AI**: Dossier reads the company's own public pages, and sends the profile, the post, that public text and any notes you typed into **Notes for the AI** to the AI provider you chose. You review and can edit the subject and message before anything goes out. **Send cold email** sends it from your connected Google account with your base resume PDF attached, keeps a copy in Dossier and marks the startup contacted. Dossier never sends cold emails on its own.
 
 ### Fellowships and scholarships
 

@@ -26,6 +26,8 @@ export type ColdEmailInput = {
   };
   /** The address the email will be sent to. */
   email: string;
+  /** The candidate's own extra context, typed into the panel. */
+  notes: string;
 };
 
 const INSTRUCTIONS = `You write one short cold email from a candidate to a company that is hiring. The candidate sends it themselves; Dossier never sends it. A current resume is attached, so the email doesn't repeat it.
@@ -40,7 +42,7 @@ const oneLine = (value: string) => value.replace(/\s+/g, " ").trim().slice(0, 15
 const clean = (value: string) => value.trim().slice(0, 6_000);
 
 /** A cold email: a subject and a body that make the case for the profile's fit. */
-export const writeColdEmail: Task<ColdEmailInput, { subject: string; body: string }> = async (provider, { profile, company, email }, options) => {
+export const writeColdEmail: Task<ColdEmailInput, { subject: string; body: string }> = async (provider, { profile, company, email, notes }, options) => {
   const answer = await provider.complete({
     task: "write-cold-email",
     system: system(INSTRUCTIONS, truthfulness(options.strict), CREATIVITY[options.creativity]),
@@ -52,6 +54,7 @@ export const writeColdEmail: Task<ColdEmailInput, { subject: string; body: strin
           `The company and the role it posted:\n${JSON.stringify(company, null, 2)}`,
           `What the company published:\n${postingForPrompt([company.summary, company.details].filter(Boolean).join("\n\n"))}`,
           `Public text from the company's own site:\n${postingForPrompt(company.research)}`,
+          notes.trim() && `Extra notes from the candidate, trusted facts to take into account:\n${notes.trim().slice(0, 2_000)}`,
           `The email goes to: ${email}`,
         ]
           .filter(Boolean)

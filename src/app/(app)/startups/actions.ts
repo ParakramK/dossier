@@ -28,7 +28,7 @@ const startupId = z.string().min(1).max(64);
 const GONE = "That startup is no longer in the list. Refresh the page.";
 
 /** "Draft cold email": read the company's own pages, then write a subject and message that make the profile's case. */
-export const draftColdEmail = action(z.object({ id: startupId, email: z.string().max(200) }), async ({ id, email }) => {
+export const draftColdEmail = action(z.object({ id: startupId, email: z.string().max(200), notes: z.string().max(2_000).default("") }), async ({ id, email, notes }) => {
   if (!(await isAiConfigured())) throw new ActionError("Choose an AI provider in Settings → AI provider first.");
   const [startup, profile, options] = await Promise.all([getStartup(id), loadProfile(), loadTaskOptions()]);
   if (!startup) throw new ActionError(GONE);
@@ -50,6 +50,7 @@ export const draftColdEmail = action(z.object({ id: startupId, email: z.string()
           research,
         },
         email: email.trim(),
+        notes,
       },
       options,
     );

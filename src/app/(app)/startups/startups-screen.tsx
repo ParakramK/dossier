@@ -524,13 +524,14 @@ function ColdEmail({
   const [to, setTo] = useState(startup.emails[0]?.email ?? "");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState(startup.outreach || "");
+  const [notes, setNotes] = useState("");
   const [drafting, setDrafting] = useState(false);
   const [sending, setSending] = useState(false);
 
   const draft = async () => {
     if (!to.trim()) return toast("Choose an address to write to first.");
     setDrafting(true);
-    const result = toastResult(await draftColdEmail({ id: startup.id, email: to.trim() }));
+    const result = toastResult(await draftColdEmail({ id: startup.id, email: to.trim(), notes }));
     setDrafting(false);
     if (!result.ok) return;
     setSubject(result.data.subject);
@@ -571,6 +572,14 @@ function ColdEmail({
       <Input label="To" value={to} placeholder="name@company.com" maxLength={200} onChange={(event) => setTo(event.target.value)} />
       <Input label="Subject" value={subject} placeholder="A line about the work" maxLength={200} onChange={(event) => setSubject(event.target.value)} />
       <Textarea label="Message" rows={8} value={body} maxLength={6_000} onChange={(event) => setBody(event.target.value)} />
+      <Textarea
+        label="Notes for the AI"
+        rows={3}
+        value={notes}
+        maxLength={2_000}
+        placeholder="Anything else the AI should know about you or this company"
+        onChange={(event) => setNotes(event.target.value)}
+      />
       <div className="flex flex-wrap gap-3">
         <Button size="sm" variant="secondary" disabled={!aiReady || drafting || sending} onClick={() => void draft()}>
           {drafting ? "Researching and writing…" : "Draft with AI"}

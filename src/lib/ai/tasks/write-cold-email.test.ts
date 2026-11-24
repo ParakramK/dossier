@@ -24,7 +24,7 @@ const sent = (provider: MockProvider): ChatCall => provider.calls[0];
 describe("writeColdEmail", () => {
   it("writes a subject and a fit-focused email from the profile and the company's site", async () => {
     const provider = new MockProvider({ reply: () => ({ subject: " Building evaluation data at Acme ", body: "  Hello Acme team,\n\nI built a toolkit for multilingual data. Resume attached.\n\nJane  " }) });
-    const { data, promptVersion } = await writeColdEmail(provider, { profile, company, email: "jobs@acme.example" }, options);
+    const { data, promptVersion } = await writeColdEmail(provider, { profile, company, email: "jobs@acme.example", notes: "I spoke at a conference about Nepali speech data last year." }, options);
 
     expect(promptVersion).toBe(COLD_EMAIL_VERSION);
     expect(data.subject).toBe("Building evaluation data at Acme");
@@ -36,6 +36,7 @@ describe("writeColdEmail", () => {
     expect(call.system).toMatch(/never invent/i);
     const text = [call.system, ...call.messages.map((message) => message.content)].join("\n");
     expect(text).toContain(company.research);
+    expect(text).toContain("I spoke at a conference about Nepali speech data last year.");
     expect(text).toContain("jobs@acme.example");
     // Contact details stay out of what the model reads.
     expect(text).not.toContain(profile.basics.email);
@@ -44,7 +45,7 @@ describe("writeColdEmail", () => {
 
   it("bounds an unusually long answer", async () => {
     const provider = new MockProvider({ reply: () => ({ subject: "x".repeat(500), body: "y".repeat(9_000) }) });
-    const { data } = await writeColdEmail(provider, { profile, company, email: "jobs@acme.example" }, options);
+    const { data } = await writeColdEmail(provider, { profile, company, email: "jobs@acme.example", notes: "" }, options);
     expect(data.subject).toHaveLength(150);
     expect(data.body).toHaveLength(6_000);
   });
