@@ -15,4 +15,5 @@ export { scorePosting } from "./score-posting";
 export { answerQuestion } from "./answer-question";
 export { prepareInterview } from "./prepare-interview";
 export { writeMessage } from "./write-message";
+export { COLD_EMAIL_VERSION, writeColdEmail, type ColdEmailInput } from "./write-cold-email";
 export { WARM_OUTREACH_VERSION, warmOutreach, type OutreachProject } from "./warm-outreach";

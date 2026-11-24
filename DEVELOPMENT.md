@@ -230,6 +230,8 @@ With the app container stopped, `docker compose run --rm -T -e JOBS_LIVE=… app
 
 Fellowships (`/fellowships`) is a catalogue kept in code (`src/lib/opportunities/catalog.ts`), with the user's status and notes in `OpportunityWatch`. Adding a programme means adding an entry with a unique id; the export (schema 17) carries the watchlist. The hand-written job sources from `src/lib/job-search/merojob.ts`, `remotive.ts`, `yc.ts` and `remote-boards.ts` are built-in portals whose adapters are picked in `src/lib/portals/adapters.ts`. A warm introduction is a four-sentence AI task (`src/lib/ai/tasks/warm-outreach.ts`) saved on `Startup.outreach`; Dossier never sends it.
 
+Cold emails live on the Startups screen: "Draft with AI" reads the company's own pages (`src/lib/startups/research.ts`), the profile and the post, writes a subject and a fit-focused message (`src/lib/ai/tasks/write-cold-email.ts`), and the user reviews it. "Send cold email" (`src/lib/cold-email.ts`) sends it through the connected Gmail with the profile's base resume attached, saves it in `EmailMessage` and marks the startup contacted. Nothing is sent without the Send click.
+
 ## Scoring
 
 Score in Positions, New application's score and the job agent go through one scoring engine (E25, `src/lib/scoring`). A scoring model judges six factors about one posting and one profile; Dossier adds the answers up. Nothing is judged in code: code only prepares inputs (the posting's lines, the years of paid work) and weighs the answers.

@@ -11,6 +11,7 @@ import { ScoreMenu } from "@/components/score-menu";
 import { toast, toastResult } from "@/components/toast";
 import { Button, buttonClassName } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useJob } from "@/hooks/use-job";
 import { formatDateTime } from "@/lib/dates";
@@ -29,7 +30,7 @@ import {
   type StartupViewName,
 } from "@/lib/startups/types";
 
-import { lookUpStartupAddresses, refreshStartupsNow, removeStartupForGood, saveStartupNotes, setStartupStatus, startScoringStartup } from "./actions";
+import { draftColdEmail, lookUpStartupAddresses, refreshStartupsNow, removeStartupForGood, saveStartupNotes, sendColdEmailNow, setStartupStatus, startScoringStartup } from "./actions";
 
 export type StartupsScreenProps = {
   filter: StartupFilter;
@@ -493,6 +494,7 @@ function StartupPreview({
           ))}
         </p>
       )}
+      <ColdEmail startup={startup} aiReady={aiReady} onSent={move} />
       <Notes id={startup.id} initial={startup.notes} />
       <Button size="sm" variant="danger-text" className="self-start" onClick={() => setRemoving(true)}>
         Remove for good
@@ -505,6 +507,78 @@ function StartupPreview({
         confirmLabel="Remove for good"
         onConfirm={() => void remove()}
       />
+    </section>
+  );
+}
+
+/** A cold email to a company: read its site, draft the fit, review, send with the base resume. */
+function ColdEmail({
+  startup,
+  aiReady,
+  onSent,
+}: {
+  startup: StartupView;
+  aiReady: boolean;
+  onSent: (status: StartupStatusName, message: string) => Promise<void>;
+}) {
+  const [to, setTo] = useState(startup.emails[0]?.email ?? "");
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState(startup.outreach || "");
+  const [drafting, setDrafting] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  const draft = async () => {
+    if (!to.trim()) return toast("Choose an address to write to first.");
+    setDrafting(true);
+    const result = toastResult(await draftColdEmail({ id: startup.id, email: to.trim() }));
+    setDrafting(false);
+    if (!result.ok) return;
+    setSubject(result.data.subject);
+    setBody(result.data.body);
+  };
+
+  const send = async () => {
+    setSending(true);
+    const result = toastResult(await sendColdEmailNow({ id: startup.id, to, subject, body }));
+    setSending(false);
+    if (!result.ok) return;
+    toast(`Sent to ${to} with ${result.data.attachment}.`);
+    await onSent("CONTACTED", `Marked ${startup.company} as contacted.`);
+  };
+
+  return (
+    <section className="flex flex-col gap-3 border-t border-line pt-5" aria-label="Cold email">
+      <div>
+        <h3 className="text-[15px] font-medium">Cold email</h3>
+        <p className="text-sm text-muted">
+          Dossier reads the company&apos;s own pages, drafts how you fit, and sends what you review from your connected Gmail with your base resume attached. Nothing is sent until you press Send.
+        </p>
+      </div>
+      {startup.emails.length > 0 && (
+        <div className="flex flex-wrap gap-x-2 gap-y-1">
+          {startup.emails.map((entry) => (
+            <button
+              key={entry.email}
+              type="button"
+              onClick={() => setTo(entry.email)}
+              className="text-meta text-link underline underline-offset-2 hover:underline"
+            >
+              {entry.email}
+            </button>
+          ))}
+        </div>
+      )}
+      <Input label="To" value={to} placeholder="name@company.com" maxLength={200} onChange={(event) => setTo(event.target.value)} />
+      <Input label="Subject" value={subject} placeholder="A line about the work" maxLength={200} onChange={(event) => setSubject(event.target.value)} />
+      <Textarea label="Message" rows={8} value={body} maxLength={6_000} onChange={(event) => setBody(event.target.value)} />
+      <div className="flex flex-wrap gap-3">
+        <Button size="sm" variant="secondary" disabled={!aiReady || drafting || sending} onClick={() => void draft()}>
+          {drafting ? "Researching and writing…" : "Draft with AI"}
+        </Button>
+        <Button size="sm" disabled={drafting || sending || !to.trim() || !subject.trim() || !body.trim()} onClick={() => void send()}>
+          {sending ? "Sending…" : "Send cold email"}
+        </Button>
+      </div>
     </section>
   );
 }

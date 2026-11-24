@@ -119,6 +119,10 @@ Disallow: /
 
 **If you use it:** Startups is for applying for jobs. Offering your services as a freelancer by email is advertising in many countries: in Germany and the rest of the EU it needs the company's consent first, even when the company published the address, and in the US, Canada and Australia such an email needs a way to opt out. Dossier doesn't support that use. Whether the GDPR's exemption for personal activities covers your own job search hasn't been settled, so Dossier treats the addresses as personal data: it looks up people's own addresses only when you ask, drops them after 14 days unless you write to that startup, keeps every address out of what the AI receives, and **Remove for good** deletes a startup and keeps only hashes so it doesn't come back. If someone asks you to delete their address, that's the button.
 
+### Cold emails
+
+A cold email is written on the Startups screen after you press **Draft with AI**: Dossier reads the company's own public pages, and sends the profile, the post and that public text to the AI provider you chose. You review and can edit the subject and message before anything goes out. **Send cold email** sends it from your connected Google account with your base resume PDF attached, keeps a copy in Dossier and marks the startup contacted. Dossier never sends cold emails on its own.
+
 ### Fellowships and scholarships
 
 Fellowships (`/fellowships`) is a list in Dossier's code, each entry linking to the programme's own page. Opening it sends nothing; what you mark and write stays in your database, goes into an export you make, and is removed by **Delete everything**. A warm introduction is written by an AI task from your profile and a posting, stays in your database, and is never sent by Dossier.
